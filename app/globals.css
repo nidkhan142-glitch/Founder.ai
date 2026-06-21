@@ -8,7 +8,7 @@
   --bg-primary: #09090b;
   --bg-secondary: #121215;
   --bg-tertiary: #18181b;
-  
+   
   --border-color: #27272a;
   --border-glow: #3f3f46;
 
@@ -16,9 +16,10 @@
   --text-secondary: #a1a1aa;
   --text-muted: #71717a;
 
-  --brand-violet: #8b5cf6;
-  --brand-violet-hover: #7c3aed;
-  --brand-violet-glow: rgba(139, 92, 246, 0.15);
+  /* Main accent color: electric blue */
+  --brand-violet: #3b82f6;
+  --brand-violet-hover: #2563eb;
+  --brand-violet-glow: rgba(59, 130, 246, 0.15);
 
   --accent-blue: #3b82f6;
   --accent-cyan: #06b6d4;
@@ -68,8 +69,7 @@ html, body {
 
 .header {
   border-bottom: 1px solid var(--border-color);
-  background-color: rgba(9, 9, 11, 0.8);
-  backdrop-filter: blur(12px);
+  background-color: #0A0A0A;
   position: sticky;
   top: 0;
   z-index: 50;
@@ -86,9 +86,7 @@ html, body {
   font-size: 1.5rem;
   font-weight: 800;
   letter-spacing: -0.05em;
-  background: linear-gradient(135deg, #ffffff 30%, var(--brand-violet) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--brand-violet);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -111,8 +109,8 @@ html, body {
 
 .nav-btn {
   background: transparent;
-  border: 1px solid var(--border-color);
-  color: var(--text-secondary);
+  border: 1px solid var(--text-muted);
+  color: var(--text-muted);
   padding: 0.5rem 1rem;
   border-radius: 8px;
   cursor: pointer;

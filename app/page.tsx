@@ -269,45 +269,42 @@ export default function Home() {
 
   return (
     <>
-      <header className="header">
-        <div className="container header-inner">
-          <div className="logo">
-            FounderAI<span className="logo-dot"></span>
-            <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontWeight: 400, marginLeft: "0.25rem" }}>
-              v1 Accountability Partner
-            </span>
-          </div>
-          <div className="nav-links">
-            {offlineMode && (
-              <span style={{ fontSize: "0.8rem", color: "var(--accent-amber)", display: "flex", alignItems: "center", gap: "0.25rem" }}>
-                ⚠️ Running offline
-              </span>
-            )}
-            <button className="nav-btn" onClick={() => setShowSettings(!showSettings)}>
-              ⚙️ {customApiKey ? "API Key Configured" : "Configure API Key"}
-            </button>
-            {user ? (
-              <span className="nav-btn nav-btn-primary" style={{ cursor: "default" }}>
-                👤 {user.email}
-              </span>
-            ) : (
-              <button className="nav-btn nav-btn-primary" onClick={() => {
-                setAuthEmail("");
-                setAuthStatus("");
-                const email = prompt("Enter email to sign in via Magic Link:");
-                if (email) {
-                  setAuthEmail(email);
-                  supabase?.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin } })
-                    .then(() => alert("Magic link sent!"))
-                    .catch((err) => alert(err.message));
-                }
-              }}>
-                Sign In
-              </button>
-            )}
-          </div>
-        </div>
-      </header>
+<header className="header">
+  <div className="container header-inner">
+    <div className="logo">
+      FounderAI<span className="logo-dot"></span>
+    </div>
+    <div className="nav-links">
+      {offlineMode && (
+        <span style={{ fontSize: "0.8rem", color: "var(--accent-amber)", display: "flex", alignItems: "center", gap: "0.25rem" }}>
+          ⚠️ Running offline
+        </span>
+      )}
+      <button className="nav-btn" onClick={() => setShowSettings(!showSettings)}>
+        ⚙️ {customApiKey ? "API Key Configured" : "Configure API Key"}
+      </button>
+      {user ? (
+        <span className="nav-btn nav-btn-primary" style={{ cursor: "default" }}>
+          👤 {user.email}
+        </span>
+      ) : (
+        <button className="nav-btn nav-btn-primary" onClick={() => {
+          setAuthEmail("");
+          setAuthStatus("");
+          const email = prompt("Enter email to sign in via Magic Link:");
+          if (email) {
+            setAuthEmail(email);
+            supabase?.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin } })
+              .then(() => alert("Magic link sent!"))
+              .catch((err) => alert(err.message));
+          }
+        }}>
+          Sign In
+        </button>
+      )}
+    </div>
+  </div>
+</header>
 
       <main className="container">
         {showSettings && (
