@@ -334,11 +334,11 @@ export default function Home() {
 
         <div className="onboarding-grid">
           {/* Question Onboarding Input */}
-          <div className="card">
-            <h2 className="form-title">Validate Your Startup Idea</h2>
-            <p className="form-subtitle">
-              We don't validate ideas. We force intellectual honesty. Enter your answers to generate your onboarding risk assessment and the 7-day validation blueprint.
-            </p>
+             <div className="card">
+               <h2 className="hero-title">Validate Your Startup Idea</h2>
+               <p className="form-subtitle">
+                 We don't validate ideas. We force intellectual honesty. Enter your answers to generate your onboarding risk assessment and the 7-day validation blueprint.
+               </p>
 
             <form onSubmit={handleRunValidation}>
               <div className="form-group">

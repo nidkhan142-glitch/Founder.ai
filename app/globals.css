@@ -172,6 +172,13 @@ html, body {
   margin-bottom: 0.5rem;
 }
 
+.hero-title {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.5rem;
+}
+
 .form-subtitle {
   color: var(--text-secondary);
   font-size: 0.95rem;
