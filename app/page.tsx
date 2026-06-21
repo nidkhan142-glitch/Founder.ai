@@ -496,23 +496,23 @@ export default function Home() {
               </div>
             ) : report ? (
               <div>
-                {/* 1. Founder Verdict */}
-                <div className="report-header">
-                  <div>
-                    <span style={{ fontSize: "0.8rem", textTransform: "uppercase", color: "var(--text-muted)", fontWeight: 700 }}>
-                      Validation Verdict
-                    </span>
-                    <h2 style={{ fontSize: "1.8rem", fontWeight: 800, marginTop: "0.25rem" }}>
-                      Founder Report
-                    </h2>
-                  </div>
-                  <span className={`verdict-badge ${
-                    report.verdict === "Proceed" ? "verdict-proceed" :
-                    report.verdict === "Pivot" ? "verdict-pivot" : "verdict-abandon"
-                  }`}>
-                    {report.verdict} ({report.confidence} Confidence)
-                  </span>
-                </div>
+                 {/* 1. Founder Verdict */}
+                 <div className="report-header">
+                   <div>
+                     <span style={{ fontSize: "0.8rem", textTransform: "uppercase", color: "var(--text-muted)", fontWeight: 700 }}>
+                       Validation Verdict
+                     </span>
+                     <h2 style={{ fontSize: "2.2rem", fontWeight: 800, marginTop: "0.25rem" }}>
+                       Founder Report
+                     </h2>
+                   </div>
+                   <span className={`verdict-badge verdict-badge-large ${
+                     report.verdict === "Proceed" ? "verdict-proceed" :
+                     report.verdict === "Pivot" ? "verdict-pivot" : "verdict-abandon"
+                   }`}>
+                     {report.verdict} ({report.confidence} Confidence)
+                   </span>
+                 </div>
 
                 <div className="must-be-true-box">
                   <div className="must-be-true-title">What Must Be True to Proceed</div>
@@ -525,15 +525,15 @@ export default function Home() {
                     <span>02.</span> Reality Check
                   </h3>
                   <div className="reality-grid">
-                    <div className="reality-card">
-                      <div className="reality-card-title">Problem Confidence</div>
-                      <div className="reality-score">
-                        {report.problemConfidence}<span>/10</span>
-                      </div>
-                      <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", lineHeight: 1.4 }}>
-                        {report.problemConfidenceJustification}
-                      </p>
-                    </div>
+                     <div className="reality-card">
+                       <div className="reality-card-title">Problem Confidence</div>
+                       <div className="reality-score problem-confidence-score">
+                         {report.problemConfidence}<span>/10</span>
+                       </div>
+                       <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", lineHeight: 1.4 }}>
+                         {report.problemConfidenceJustification}
+                       </p>
+                     </div>
 
                     <div className="reality-card">
                       <div className="reality-card-title">Target Beachhead</div>
@@ -566,60 +566,41 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* 3. Validation Matrix */}
-                <div className="report-section">
-                  <h3 className="section-title">
-                    <span>03.</span> Validation Matrix
-                  </h3>
-                  <p style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginBottom: "1rem" }}>
-                    Click the info icon or hover over any row to unlock the underlying AI justification.
-                  </p>
-                  <table className="matrix-table">
-                    <thead>
-                      <tr>
-                        <th className="matrix-th">Dimension</th>
-                        <th className="matrix-th" style={{ width: "80px", textAlign: "center" }}>Score</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {report.validationMatrix.map((row, idx) => {
-                        const isExpanded = expandedMatrixRow === row.dimension;
-                        return (
-                          <React.Fragment key={idx}>
-                            <tr 
-                              className="matrix-row"
-                              onMouseEnter={() => setExpandedMatrixRow(row.dimension)}
-                              onMouseLeave={() => setExpandedMatrixRow(null)}
-                              onClick={() => setExpandedMatrixRow(isExpanded ? null : row.dimension)}
-                              style={{ cursor: "pointer" }}
-                            >
-                              <td className="matrix-td" style={{ fontWeight: 600 }}>
-                                {row.dimension}
-                                <button className="info-trigger" title="View details">
-                                  <svg className="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                  </svg>
-                                </button>
-                              </td>
-                              <td className="matrix-td" style={{ textAlign: "center" }}>
-                                <span className="matrix-score-badge">{row.score}/10</span>
-                              </td>
-                            </tr>
-                            {isExpanded && (
-                              <tr className="justification-row">
-                                <td colSpan={2} className="matrix-td" style={{ padding: 0 }}>
-                                  <div className="justification-content">
-                                    {row.why}
-                                  </div>
-                                </td>
-                              </tr>
-                            )}
-                          </React.Fragment>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                 {/* 3. Validation Matrix */}
+                 <div className="report-section">
+                   <h3 className="section-title">
+                     <span>03.</span> Validation Matrix
+                   </h3>
+                   <p style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginBottom: "1rem" }}>
+                     Click the info icon or hover over any row to unlock the underlying AI justification.
+                   </p>
+                   <div className="matrix-card-container">
+                     {report.validationMatrix.map((row, idx) => {
+                       const isExpanded = expandedMatrixRow === row.dimension;
+                       return (
+                         <div key={idx} className="matrix-card" onMouseEnter={() => setExpandedMatrixRow(row.dimension)} onMouseLeave={() => setExpandedMatrixRow(null)} onClick={() => setExpandedMatrixRow(isExpanded ? null : row.dimension)} style={{ cursor: "pointer" }}>
+                           <div className="matrix-card-dimension">
+                             {row.dimension}
+                             <button className="info-trigger" title="View details">
+                               <svg className="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                               </svg>
+                             </button>
+                           </div>
+                           <div className="matrix-card-score">{row.score}/10</div>
+                           <div className="matrix-card-bar">
+                             <div className="matrix-card-bar-fill" style={{ width: `${row.score * 10}%` }}></div>
+                           </div>
+                           {isExpanded && (
+                             <div className="matrix-card-justification">
+                               {row.why}
+                             </div>
+                           )}
+                         </div>
+                       );
+                     })}
+                   </div>
+                 </div>
 
                 {/* 4. Biggest Risk */}
                 <div className="report-section">

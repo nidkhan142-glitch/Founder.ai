@@ -179,6 +179,95 @@ html, body {
   margin-bottom: 0.5rem;
 }
 
+/* Step 3: Report Display enhancements */
+.verdict-badge-large {
+  font-size: 1.25rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.problem-confidence-score {
+  font-size: 4rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.problem-confidence-score span {
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+/* Validation Matrix Card Styles */
+.matrix-card-container {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.matrix-card {
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.matrix-card:hover {
+  border-color: var(--border-glow);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+}
+
+.matrix-card-dimension {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.matrix-card-dimension .info-trigger {
+  margin-left: 0.5rem;
+}
+
+.matrix-card-score {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+
+.matrix-card-bar {
+  background-color: var(--border-color);
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.matrix-card-bar-fill {
+  background-color: var(--brand-violet);
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.matrix-card-justification {
+  background-color: rgba(9, 9, 11, 0.6);
+  border-radius: 8px;
+  padding: 1rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  border-left: 3px solid var(--brand-violet);
+}
+
 .form-subtitle {
   color: var(--text-secondary);
   font-size: 0.95rem;
