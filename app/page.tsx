@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import { motion } from "framer-motion";
 
 // Types matching our database/validation engine schema
 interface ValidationReport {
@@ -77,13 +76,18 @@ export default function Home() {
   // Validation sprint checklist items
   const [checkedSprintItems, setCheckedSprintItems] = useState<boolean[]>([false, false, false]);
 
-  // Loading quotes for the CEO validation engine
-  const loadingSteps = [
-    "Deconstructing startup assumptions...",
-    "Applying The Mom Test rules (eliminating hypotheticals)...",
-    "Running competitive risk assessment...",
-    "Defining success metrics and verification protocol...",
-  ];
+   // Loading quotes for the CEO validation engine
+   const loadingSteps = [
+     "Deconstructing startup assumptions...",
+     "Applying The Mom Test rules (eliminating hypotheticals)...",
+     "Running competitive risk assessment...",
+     "Defining success metrics and verification protocol...",
+   ];
+
+   const fadeUp = {
+     hidden: { opacity: 0, y: 20 },
+     visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
+   };
 
   // Check for session & local settings on mount
   useEffect(() => {
@@ -332,13 +336,19 @@ export default function Home() {
           </div>
         )}
 
-        <div className="onboarding-grid">
-          {/* Question Onboarding Input */}
-             <div className="card">
-               <h2 className="hero-title">Validate Your Startup Idea</h2>
-               <p className="form-subtitle">
-                 We don't validate ideas. We force intellectual honesty. Enter your answers to generate your onboarding risk assessment and the 7-day validation blueprint.
-               </p>
+          <motion.div
+            className="onboarding-grid"
+            whileInView
+            viewport={{ once: true }}
+            initial="hidden"
+            animate="visible"
+          >
+            {/* Question Onboarding Input */}
+            <div className="card">
+              <h2 className="hero-title">Validate Your Startup Idea</h2>
+              <p className="form-subtitle">
+                We don't validate ideas. We force intellectual honesty. Enter your answers to generate your onboarding risk assessment and the 7-day validation blueprint.
+              </p>
 
             <form onSubmit={handleRunValidation}>
               <div className="form-group">
@@ -497,7 +507,13 @@ export default function Home() {
             ) : report ? (
               <div>
                  {/* 1. Founder Verdict */}
-                 <div className="report-header">
+                  <motion.div
+                    className="report-header"
+                    whileInView
+                    viewport={{ once: true }}
+                    initial="hidden"
+                    animate="visible"
+                  >
                    <div>
                      <span style={{ fontSize: "0.8rem", textTransform: "uppercase", color: "var(--text-muted)", fontWeight: 700 }}>
                        Validation Verdict
@@ -514,60 +530,60 @@ export default function Home() {
                    </span>
                  </div>
 
-                <div className="must-be-true-box">
-                  <div className="must-be-true-title">What Must Be True to Proceed</div>
-                  <div className="must-be-true-text">"{report.whatMustBeTrue}"</div>
-                </div>
+                 <motion.div className="must-be-true-box" whileInView viewport={{ once: true }} initial="hidden" animate="visible">
+                   <div className="must-be-true-title">What Must Be True to Proceed</div>
+                   <div className="must-be-true-text">"{report.whatMustBeTrue}"</div>
+                 </motion.div>
 
                 {/* 2. Reality Check */}
-                <div className="report-section">
-                  <h3 className="section-title">
-                    <span>02.</span> Reality Check
-                  </h3>
-                  <div className="reality-grid">
+                 <motion.div className="report-section" whileInView viewport={{ once: true }} initial="hidden" animate="visible">
+                   <h3 className="section-title">
+                     <span>02.</span> Reality Check
+                   </h3>
+                   <div className="reality-grid">
+                      <div className="reality-card">
+                        <div className="reality-card-title">Problem Confidence</div>
+                        <div className="reality-score problem-confidence-score">
+                          {report.problemConfidence}<span>/10</span>
+                        </div>
+                        <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", lineHeight: 1.4 }}>
+                          {report.problemConfidenceJustification}
+                        </p>
+                      </div>
+ 
                      <div className="reality-card">
-                       <div className="reality-card-title">Problem Confidence</div>
-                       <div className="reality-score problem-confidence-score">
-                         {report.problemConfidence}<span>/10</span>
-                       </div>
-                       <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", lineHeight: 1.4 }}>
-                         {report.problemConfidenceJustification}
+                       <div className="reality-card-title">Target Beachhead</div>
+                       <p style={{ fontSize: "0.95rem", fontWeight: 700, marginBottom: "0.5rem", color: "var(--text-primary)" }}>
+                         {report.first10Customers}
                        </p>
+                       <div className="reality-card-title" style={{ marginTop: "1rem" }}>Evidence Status</div>
+                       <ul className="evidence-list">
+                         {report.evidenceStatus.exists.map((item, idx) => (
+                           <li key={idx} className="evidence-item" style={{ color: "var(--accent-emerald)" }}>
+                             ✓ {item}
+                           </li>
+                         ))}
+                         {report.evidenceStatus.doesNotExist.map((item, idx) => (
+                           <li key={idx} className="evidence-item" style={{ color: "var(--accent-rose)" }}>
+                             ❌ {item}
+                           </li>
+                         ))}
+                       </ul>
                      </div>
-
-                    <div className="reality-card">
-                      <div className="reality-card-title">Target Beachhead</div>
-                      <p style={{ fontSize: "0.95rem", fontWeight: 700, marginBottom: "0.5rem", color: "var(--text-primary)" }}>
-                        {report.first10Customers}
-                      </p>
-                      <div className="reality-card-title" style={{ marginTop: "1rem" }}>Evidence Status</div>
-                      <ul className="evidence-list">
-                        {report.evidenceStatus.exists.map((item, idx) => (
-                          <li key={idx} className="evidence-item" style={{ color: "var(--accent-emerald)" }}>
-                            ✓ {item}
-                          </li>
-                        ))}
-                        {report.evidenceStatus.doesNotExist.map((item, idx) => (
-                          <li key={idx} className="evidence-item" style={{ color: "var(--accent-rose)" }}>
-                            ❌ {item}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-
-                  <div className="reality-card" style={{ marginTop: "1.5rem" }}>
-                    <div className="reality-card-title">Real Alternative Behaviors</div>
-                    <ul style={{ paddingLeft: "1.25rem", fontSize: "0.9rem", color: "var(--text-secondary)", display: "flex", flexDirection: "column", gap: "0.4rem", marginTop: "0.5rem" }}>
-                      {report.currentAlternatives.map((alt, idx) => (
-                        <li key={idx}>{alt}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
+                   </div>
+ 
+                   <div className="reality-card" style={{ marginTop: "1.5rem" }}>
+                     <div className="reality-card-title">Real Alternative Behaviors</div>
+                     <ul style={{ paddingLeft: "1.25rem", fontSize: "0.9rem", color: "var(--text-secondary)", display: "flex", flexDirection: "column", gap: "0.4rem", marginTop: "0.5rem" }}>
+                       {report.currentAlternatives.map((alt, idx) => (
+                         <li key={idx}>{alt}</li>
+                       ))}
+                     </ul>
+                   </div>
+                 </motion.div>
 
                  {/* 3. Validation Matrix */}
-                 <div className="report-section">
+                 <motion.div className="report-section" whileInView viewport={{ once: true }} initial="hidden" animate="visible">
                    <h3 className="section-title">
                      <span>03.</span> Validation Matrix
                    </h3>
@@ -600,80 +616,94 @@ export default function Home() {
                        );
                      })}
                    </div>
+                 </motion.div>
+                           <div className="matrix-card-score">{row.score}/10</div>
+                           <div className="matrix-card-bar">
+                             <div className="matrix-card-bar-fill" style={{ width: `${row.score * 10}%` }}></div>
+                           </div>
+                           {isExpanded && (
+                             <div className="matrix-card-justification">
+                               {row.why}
+                  </motion.div>
+                           )}
+                         </div>
+                       );
+                     })}
+                   </div>
                  </div>
 
                 {/* 4. Biggest Risk */}
-                <div className="report-section">
-                  <h3 className="section-title">
-                    <span>04.</span> Biggest Assumption
-                  </h3>
-                  <div className="risk-box">
-                    <div className="risk-title">Core Risk Assumption</div>
-                    <p className="risk-desc" style={{ fontWeight: 600, marginBottom: "0.75rem" }}>
-                      "{report.biggestRisk.assumption}"
-                    </p>
-                    <div className="risk-title" style={{ fontSize: "0.85rem", opacity: 0.85 }}>Failure Mode</div>
-                    <p className="risk-desc" style={{ fontSize: "0.9rem", color: "var(--text-secondary)" }}>
-                      {report.biggestRisk.failureScenario}
-                    </p>
-                  </div>
-                </div>
+                 <motion.div className="report-section" whileInView viewport={{ once: true }} initial="hidden" animate="visible">
+                   <h3 className="section-title">
+                     <span>04.</span> Biggest Assumption
+                   </h3>
+                   <div className="risk-box">
+                     <div className="risk-title">Core Risk Assumption</div>
+                     <p className="risk-desc" style={{ fontWeight: 600, marginBottom: "0.75rem" }}>
+                       "{report.biggestRisk.assumption}"
+                     </p>
+                     <div className="risk-title" style={{ fontSize: "0.85rem", opacity: 0.85 }}>Failure Mode</div>
+                     <p className="risk-desc" style={{ fontSize: "0.9rem", color: "var(--text-secondary)" }}>
+                       {report.biggestRisk.failureScenario}
+                     </p>
+                   </div>
+                 </motion.div>
 
                 {/* 5. Validation Sprint (UNFINISHED UX) */}
-                <div className="report-section" style={{ borderBottom: "none", paddingBottom: 0 }}>
-                  <h3 className="section-title">
-                    <span>05.</span> Validation Sprint (7 Days)
-                  </h3>
-                  <p style={{ fontSize: "0.85rem", color: "var(--accent-rose)", fontWeight: 500, marginBottom: "1rem" }}>
-                    ⚠️ STATUS: PENDING EXECUTION — COMPLETE THE TASKS BELOW
-                  </p>
-                  
-                  <div className="reality-card" style={{ marginBottom: "1.5rem" }}>
-                    <div className="reality-card-title">Assigned Experiment</div>
-                    <p style={{ fontSize: "1rem", fontWeight: 600, color: "var(--text-primary)" }}>
-                      {report.validationSprint.experiment}
-                    </p>
-                  </div>
-
-                  <div className="sprint-checklist">
-                    {report.validationSprint.next3Actions.map((action, idx) => (
-                      <div key={idx} className="sprint-item">
-                        <div 
-                          className={`sprint-checkbox ${checkedSprintItems[idx] ? "checked" : ""}`}
-                          onClick={() => toggleSprintItem(idx)}
-                        ></div>
-                        <div className="sprint-checkbox-desc">
-                          {action}
-                          <span>Action Step {idx + 1}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="sprint-badge-container">
-                    <div className="sprint-badge">
-                      <span className="sprint-badge-label">Target Metrics:</span>
-                      <span className="sprint-badge-value">{report.validationSprint.successCriteria}</span>
-                    </div>
-                    <div className="sprint-badge">
-                      <span className="sprint-badge-label">Commitment Check-In:</span>
-                      <span className="sprint-badge-value">
-                        {new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString(undefined, {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric"
-                        })}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="reality-card" style={{ marginTop: "1.5rem" }}>
-                    <div className="reality-card-title">Required Evidence to Log</div>
-                    <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)", lineHeight: 1.4 }}>
-                      {report.validationSprint.requiredEvidence}
-                    </p>
-                  </div>
-                </div>
+                 <motion.div className="report-section" style={{ borderBottom: "none", paddingBottom: 0 }} whileInView viewport={{ once: true }} initial="hidden" animate="visible">
+                   <h3 className="section-title">
+                     <span>05.</span> Validation Sprint (7 Days)
+                   </h3>
+                   <p style={{ fontSize: "0.85rem", color: "var(--accent-rose)", fontWeight: 500, marginBottom: "1rem" }}>
+                     ⚠️ STATUS: PENDING EXECUTION — COMPLETE THE TASKS BELOW
+                   </p>
+                   
+                   <div className="reality-card" style={{ marginBottom: "1.5rem" }}>
+                     <div className="reality-card-title">Assigned Experiment</div>
+                     <p style={{ fontSize: "1rem", fontWeight: 600, color: "var(--text-primary)" }}>
+                       {report.validationSprint.experiment}
+                     </p>
+                   </div>
+ 
+                   <div className="sprint-checklist">
+                     {report.validationSprint.next3Actions.map((action, idx) => (
+                       <div key={idx} className="sprint-item">
+                         <div 
+                           className={`sprint-checkbox ${checkedSprintItems[idx] ? "checked" : ""}`}
+                           onClick={() => toggleSprintItem(idx)}
+                         ></div>
+                         <div className="sprint-checkbox-desc">
+                           {action}
+                           <span>Action Step {idx + 1}</span>
+                         </div>
+                       </div>
+                     ))}
+                   </div>
+ 
+                   <div className="sprint-badge-container">
+                     <div className="sprint-badge">
+                       <span className="sprint-badge-label">Target Metrics:</span>
+                       <span className="sprint-badge-value">{report.validationSprint.successCriteria}</span>
+                     </div>
+                     <div className="sprint-badge">
+                       <span className="sprint-badge-label">Commitment Check-In:</span>
+                       <span className="sprint-badge-value">
+                         {new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString(undefined, {
+                           month: "short",
+                           day: "numeric",
+                           year: "numeric"
+                         })}
+                       </span>
+                     </div>
+                   </div>
+ 
+                   <div className="reality-card" style={{ marginTop: "1.5rem" }}>
+                     <div className="reality-card-title">Required Evidence to Log</div>
+                     <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)", lineHeight: 1.4 }}>
+                       {report.validationSprint.requiredEvidence}
+                     </p>
+                   </div>
+                 </motion.div>
 
                 {/* Claiming/Save report flow */}
                 {!user && (
@@ -731,44 +761,44 @@ export default function Home() {
 
         {/* Longitudinal Timeline Mock Section for V1 Demo */}
         {report && (
-          <div className="dashboard-grid" style={{ marginTop: "1rem" }}>
-            <div className="card timeline-card">
-              <h2 className="form-title">Longitudinal Validation History</h2>
-              <p className="form-subtitle">
-                This per-user, per-idea timeline tracks pivots, experiment completion logs, and weekly accountability checks. (Setup for v2/v3 check-in engine)
-              </p>
+           <motion.div className="dashboard-grid" style={{ marginTop: "1rem" }} whileInView viewport={{ once: true }} initial="hidden" animate="visible">
+             <div className="card timeline-card">
+               <h2 className="form-title">Longitudinal Validation History</h2>
+               <p className="form-subtitle">
+                 This per-user, per-idea timeline tracks pivots, experiment completion logs, and weekly accountability checks. (Setup for v2/v3 check-in engine)
+               </p>
 
-              <div className="timeline-list">
-                <div className="timeline-node active">
-                  <div className="timeline-date">TODAY</div>
-                  <div className="timeline-title">Validation Sprint Initiated</div>
-                  <div className="timeline-desc">
-                    Generated initial onboarding report. Assigned 48h experiment: <strong>{report.validationSprint.experiment}</strong>. Target success metrics set.
-                  </div>
-                </div>
+               <div className="timeline-list">
+                 <div className="timeline-node active">
+                   <div className="timeline-date">TODAY</div>
+                   <div className="timeline-title">Validation Sprint Initiated</div>
+                   <div className="timeline-desc">
+                     Generated initial onboarding report. Assigned 48h experiment: <strong>{report.validationSprint.experiment}</strong>. Target success metrics set.
+                   </div>
+                 </div>
 
-                <div className="timeline-node">
-                  <div className="timeline-date">7 DAYS FROM TODAY</div>
-                  <div className="timeline-title">Weekly Check-in #1 (Scheduled)</div>
-                  <div className="timeline-desc">
-                    Founder must submit verification evidence: {report.validationSprint.requiredEvidence}.
-                  </div>
-                </div>
-              </div>
-            </div>
+                 <div className="timeline-node">
+                   <div className="timeline-date">7 DAYS FROM TODAY</div>
+                   <div className="timeline-title">Weekly Check-in #1 (Scheduled)</div>
+                   <div className="timeline-desc">
+                     Founder must submit verification evidence: {report.validationSprint.requiredEvidence}.
+                   </div>
+                 </div>
+               </div>
+             </div>
 
-            <div className="card">
-              <h3 className="sidebar-title">Startup Moat Engine</h3>
-              <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", lineHeight: 1.5, marginBottom: "1rem" }}>
-                FounderAI builds longitudinal memory. Because reports are saved as structured data:
-              </p>
-              <ul style={{ fontSize: "0.85rem", color: "var(--text-secondary)", paddingLeft: "1.25rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                <li><strong>Week 2</strong> check-in queries previous assumptions automatically.</li>
-                <li><strong>Pivots</strong> spawn child nodes off the parent idea node.</li>
-                <li><strong>Timeline events</strong> preserve the history, proving to future investors you validate before writing code.</li>
-              </ul>
-            </div>
-          </div>
+             <div className="card">
+               <h3 className="sidebar-title">Startup Moat Engine</h3>
+               <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", lineHeight: 1.5, marginBottom: "1rem" }}>
+                 FounderAI builds longitudinal memory. Because reports are saved as structured data:
+               </p>
+               <ul style={{ fontSize: "0.85rem", color: "var(--text-secondary)", paddingLeft: "1.25rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                 <li><strong>Week 2</strong> check-in queries previous assumptions automatically.</li>
+                 <li><strong>Pivots</strong> spawn child nodes off the parent idea node.</li>
+                 <li><strong>Timeline events</strong> preserve the history, proving to future investors you validate before writing code.</li>
+               </ul>
+             </div>
+           </motion.div>
         )}
       </main>
 
