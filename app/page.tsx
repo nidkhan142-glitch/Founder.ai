@@ -616,21 +616,7 @@ export default function Home() {
                        );
                      })}
                    </div>
-                 </motion.div>
-                           <div className="matrix-card-score">{row.score}/10</div>
-                           <div className="matrix-card-bar">
-                             <div className="matrix-card-bar-fill" style={{ width: `${row.score * 10}%` }}></div>
-                           </div>
-                           {isExpanded && (
-                             <div className="matrix-card-justification">
-                               {row.why}
                   </motion.div>
-                           )}
-                         </div>
-                       );
-                     })}
-                   </div>
-                 </div>
 
                 {/* 4. Biggest Risk */}
                  <motion.div className="report-section" whileInView viewport={{ once: true }} initial="hidden" animate="visible">
