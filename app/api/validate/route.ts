@@ -26,10 +26,10 @@ export async function POST(request: Request) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    
-    // Using gemini-2.5-flash which supports structured outputs and is stable
+
+    // Using gemini-2.0-flash which supports structured outputs and is stable
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.0-flash",
       generationConfig: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -41,8 +41,8 @@ export async function POST(request: Request) {
             problemConfidence: { type: SchemaType.INTEGER, description: "Score out of 10" },
             problemConfidenceJustification: { type: SchemaType.STRING, description: "One-sentence justification for the problem confidence score." },
             first10Customers: { type: SchemaType.STRING, description: "One specific, narrow real-world group. Do not use generic demographics." },
-            currentAlternatives: { 
-              type: SchemaType.ARRAY, 
+            currentAlternatives: {
+              type: SchemaType.ARRAY,
               items: { type: SchemaType.STRING },
               description: "3 to 5 things people actually do instead (behaviors, e.g. doing nothing, using spreadsheets)"
             },
