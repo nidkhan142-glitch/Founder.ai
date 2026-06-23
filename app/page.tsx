@@ -1,6 +1,7 @@
 "use client";
-
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion";
+import { supabase } from "@/lib/supabase";
 
 // Types matching our database/validation engine schema
 interface ValidationReport {
@@ -69,25 +70,25 @@ export default function Home() {
   const [authEmail, setAuthEmail] = useState("");
   const [authStatus, setAuthStatus] = useState("");
   const [offlineMode, setOfflineMode] = useState(false);
-  
+
   // Hover state for matrix items
   const [expandedMatrixRow, setExpandedMatrixRow] = useState<string | null>(null);
 
   // Validation sprint checklist items
   const [checkedSprintItems, setCheckedSprintItems] = useState<boolean[]>([false, false, false]);
 
-   // Loading quotes for the CEO validation engine
-   const loadingSteps = [
-     "Deconstructing startup assumptions...",
-     "Applying The Mom Test rules (eliminating hypotheticals)...",
-     "Running competitive risk assessment...",
-     "Defining success metrics and verification protocol...",
-   ];
+  // Loading quotes for the CEO validation engine
+  const loadingSteps = [
+    "Deconstructing startup assumptions...",
+    "Applying The Mom Test rules (eliminating hypotheticals)...",
+    "Running competitive risk assessment...",
+    "Defining success metrics and verification protocol...",
+  ];
 
-   const fadeUp = {
-     hidden: { opacity: 0, y: 20 },
-     visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
-   };
+  const fadeUp = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
+  };
 
   // Check for session & local settings on mount
   useEffect(() => {
@@ -187,7 +188,7 @@ export default function Home() {
   const saveIdeaAndReport = async (reportData: ValidationReport) => {
     try {
       if (!supabase) return;
-      
+
       // 1. Insert into ideas table
       const { data: ideaRecord, error: ideaErr } = await supabase
         .from("ideas")
@@ -220,7 +221,7 @@ export default function Home() {
       // 3. Stub check-in entry for next week
       const checkInDate = new Date();
       checkInDate.setDate(checkInDate.getDate() + 7);
-      
+
       const { error: checkinErr } = await supabase
         .from("checkins")
         .insert({
@@ -230,7 +231,7 @@ export default function Home() {
         });
 
       if (checkinErr) throw checkinErr;
-      
+
       setAuthStatus("Report saved to your dashboard!");
     } catch (err: any) {
       console.error("Error saving database records:", err);
@@ -273,42 +274,44 @@ export default function Home() {
 
   return (
     <>
-<header className="header">
-  <div className="container header-inner">
-    <div className="logo">
-      FounderAI<span className="logo-dot"></span>
-    </div>
-    <div className="nav-links">
-      {offlineMode && (
-        <span style={{ fontSize: "0.8rem", color: "var(--accent-amber)", display: "flex", alignItems: "center", gap: "0.25rem" }}>
-          ⚠️ Running offline
-        </span>
-      )}
-      <button className="nav-btn" onClick={() => setShowSettings(!showSettings)}>
-        ⚙️ {customApiKey ? "API Key Configured" : "Configure API Key"}
-      </button>
-      {user ? (
-        <span className="nav-btn nav-btn-primary" style={{ cursor: "default" }}>
-          👤 {user.email}
-        </span>
-      ) : (
-        <button className="nav-btn nav-btn-primary" onClick={() => {
-          setAuthEmail("");
-          setAuthStatus("");
-          const email = prompt("Enter email to sign in via Magic Link:");
-          if (email) {
-            setAuthEmail(email);
-            supabase?.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin } })
-              .then(() => alert("Magic link sent!"))
-              .catch((err) => alert(err.message));
-          }
-        }}>
-          Sign In
-        </button>
-      )}
-    </div>
-  </div>
-</header>
+      <header className="header">
+        <div className="container header-inner">
+          <div className="logo">
+            FounderAI<span className="logo-dot"></span>
+          </div>
+          <div className="nav-links">
+            {offlineMode && (
+              <span style={{ fontSize: "0.8rem", color: "var(--accent-amber)", display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                ⚠️ Running offline
+              </span>
+            )}
+            {process.env.NODE_ENV === 'development' && (
+              <button className="nav-btn" onClick={() => setShowSettings(!showSettings)}>
+                ⚙️ {customApiKey ? "API Key Configured" : "Configure API Key"}
+              </button>
+            )}
+            {user ? (
+              <span className="nav-btn nav-btn-primary" style={{ cursor: "default" }}>
+                👤 {user.email}
+              </span>
+            ) : (
+              <button className="nav-btn nav-btn-primary" onClick={() => {
+                setAuthEmail("");
+                setAuthStatus("");
+                const email = prompt("Enter email to sign in via Magic Link:");
+                if (email) {
+                  setAuthEmail(email);
+                  supabase?.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin } })
+                    .then(() => alert("Magic link sent!"))
+                    .catch((err) => alert(err.message));
+                }
+              }}>
+                Sign In
+              </button>
+            )}
+          </div>
+        </div>
+      </header>
 
       <main className="container">
         {showSettings && (
@@ -336,19 +339,19 @@ export default function Home() {
           </div>
         )}
 
-          <motion.div
-            className="onboarding-grid"
-            whileInView
-            viewport={{ once: true }}
-            initial="hidden"
-            animate="visible"
-          >
-            {/* Question Onboarding Input */}
-            <div className="card">
-              <h2 className="hero-title">Validate Your Startup Idea</h2>
-              <p className="form-subtitle">
-                We don't validate ideas. We force intellectual honesty. Enter your answers to generate your onboarding risk assessment and the 7-day validation blueprint.
-              </p>
+        <motion.div
+          className="onboarding-grid"
+          whileInView
+          viewport={{ once: true }}
+          initial="hidden"
+          animate="visible"
+        >
+          {/* Question Onboarding Input */}
+          <div className="card">
+            <h2 className="hero-title">Validate Your Startup Idea</h2>
+            <p className="form-subtitle">
+              We don't validate ideas. We force intellectual honesty. Enter your answers to generate your onboarding risk assessment and the 7-day validation blueprint.
+            </p>
 
             <form onSubmit={handleRunValidation}>
               <div className="form-group">
@@ -506,190 +509,189 @@ export default function Home() {
               </div>
             ) : report ? (
               <div>
-                 {/* 1. Founder Verdict */}
-                  <motion.div
-                    className="report-header"
-                    whileInView
-                    viewport={{ once: true }}
-                    initial="hidden"
-                    animate="visible"
-                  >
-                   <div>
-                     <span style={{ fontSize: "0.8rem", textTransform: "uppercase", color: "var(--text-muted)", fontWeight: 700 }}>
-                       Validation Verdict
-                     </span>
-                     <h2 style={{ fontSize: "2.2rem", fontWeight: 800, marginTop: "0.25rem" }}>
-                       Founder Report
-                     </h2>
-                   </div>
-                   <span className={`verdict-badge verdict-badge-large ${
-                     report.verdict === "Proceed" ? "verdict-proceed" :
-                     report.verdict === "Pivot" ? "verdict-pivot" : "verdict-abandon"
-                   }`}>
-                     {report.verdict} ({report.confidence} Confidence)
-                   </span>
-                 </div>
+                {/* 1. Founder Verdict */}
+                <motion.div
+                  className="report-header"
+                  whileInView
+                  viewport={{ once: true }}
+                  initial="hidden"
+                  animate="visible"
+                >
+                  <div>
+                    <span style={{ fontSize: "0.8rem", textTransform: "uppercase", color: "var(--text-muted)", fontWeight: 700 }}>
+                      Validation Verdict
+                    </span>
+                    <h2 style={{ fontSize: "2.2rem", fontWeight: 800, marginTop: "0.25rem" }}>
+                      Founder Report
+                    </h2>
+                  </div>
+                  <span className={`verdict-badge verdict-badge-large ${report.verdict === "Proceed" ? "verdict-proceed" :
+                    report.verdict === "Pivot" ? "verdict-pivot" : "verdict-abandon"
+                    }`}>
+                    {report.verdict} ({report.confidence} Confidence)
+                  </span>
+                </motion.div>
 
-                 <motion.div className="must-be-true-box" whileInView viewport={{ once: true }} initial="hidden" animate="visible">
-                   <div className="must-be-true-title">What Must Be True to Proceed</div>
-                   <div className="must-be-true-text">"{report.whatMustBeTrue}"</div>
-                 </motion.div>
+                <motion.div className="must-be-true-box" whileInView viewport={{ once: true }} initial="hidden" animate="visible">
+                  <div className="must-be-true-title">What Must Be True to Proceed</div>
+                  <div className="must-be-true-text">"{report.whatMustBeTrue}"</div>
+                </motion.div>
 
                 {/* 2. Reality Check */}
-                 <motion.div className="report-section" whileInView viewport={{ once: true }} initial="hidden" animate="visible">
-                   <h3 className="section-title">
-                     <span>02.</span> Reality Check
-                   </h3>
-                   <div className="reality-grid">
-                      <div className="reality-card">
-                        <div className="reality-card-title">Problem Confidence</div>
-                        <div className="reality-score problem-confidence-score">
-                          {report.problemConfidence}<span>/10</span>
-                        </div>
-                        <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", lineHeight: 1.4 }}>
-                          {report.problemConfidenceJustification}
-                        </p>
+                <motion.div className="report-section" whileInView viewport={{ once: true }} initial="hidden" animate="visible">
+                  <h3 className="section-title">
+                    <span>02.</span> Reality Check
+                  </h3>
+                  <div className="reality-grid">
+                    <div className="reality-card">
+                      <div className="reality-card-title">Problem Confidence</div>
+                      <div className="reality-score problem-confidence-score">
+                        {report.problemConfidence}<span>/10</span>
                       </div>
- 
-                     <div className="reality-card">
-                       <div className="reality-card-title">Target Beachhead</div>
-                       <p style={{ fontSize: "0.95rem", fontWeight: 700, marginBottom: "0.5rem", color: "var(--text-primary)" }}>
-                         {report.first10Customers}
-                       </p>
-                       <div className="reality-card-title" style={{ marginTop: "1rem" }}>Evidence Status</div>
-                       <ul className="evidence-list">
-                         {report.evidenceStatus.exists.map((item, idx) => (
-                           <li key={idx} className="evidence-item" style={{ color: "var(--accent-emerald)" }}>
-                             ✓ {item}
-                           </li>
-                         ))}
-                         {report.evidenceStatus.doesNotExist.map((item, idx) => (
-                           <li key={idx} className="evidence-item" style={{ color: "var(--accent-rose)" }}>
-                             ❌ {item}
-                           </li>
-                         ))}
-                       </ul>
-                     </div>
-                   </div>
- 
-                   <div className="reality-card" style={{ marginTop: "1.5rem" }}>
-                     <div className="reality-card-title">Real Alternative Behaviors</div>
-                     <ul style={{ paddingLeft: "1.25rem", fontSize: "0.9rem", color: "var(--text-secondary)", display: "flex", flexDirection: "column", gap: "0.4rem", marginTop: "0.5rem" }}>
-                       {report.currentAlternatives.map((alt, idx) => (
-                         <li key={idx}>{alt}</li>
-                       ))}
-                     </ul>
-                   </div>
-                 </motion.div>
+                      <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", lineHeight: 1.4 }}>
+                        {report.problemConfidenceJustification}
+                      </p>
+                    </div>
 
-                 {/* 3. Validation Matrix */}
-                 <motion.div className="report-section" whileInView viewport={{ once: true }} initial="hidden" animate="visible">
-                   <h3 className="section-title">
-                     <span>03.</span> Validation Matrix
-                   </h3>
-                   <p style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginBottom: "1rem" }}>
-                     Click the info icon or hover over any row to unlock the underlying AI justification.
-                   </p>
-                   <div className="matrix-card-container">
-                     {report.validationMatrix.map((row, idx) => {
-                       const isExpanded = expandedMatrixRow === row.dimension;
-                       return (
-                         <div key={idx} className="matrix-card" onMouseEnter={() => setExpandedMatrixRow(row.dimension)} onMouseLeave={() => setExpandedMatrixRow(null)} onClick={() => setExpandedMatrixRow(isExpanded ? null : row.dimension)} style={{ cursor: "pointer" }}>
-                           <div className="matrix-card-dimension">
-                             {row.dimension}
-                             <button className="info-trigger" title="View details">
-                               <svg className="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                               </svg>
-                             </button>
-                           </div>
-                           <div className="matrix-card-score">{row.score}/10</div>
-                           <div className="matrix-card-bar">
-                             <div className="matrix-card-bar-fill" style={{ width: `${row.score * 10}%` }}></div>
-                           </div>
-                           {isExpanded && (
-                             <div className="matrix-card-justification">
-                               {row.why}
-                             </div>
-                           )}
-                         </div>
-                       );
-                     })}
-                   </div>
-                  </motion.div>
+                    <div className="reality-card">
+                      <div className="reality-card-title">Target Beachhead</div>
+                      <p style={{ fontSize: "0.95rem", fontWeight: 700, marginBottom: "0.5rem", color: "var(--text-primary)" }}>
+                        {report.first10Customers}
+                      </p>
+                      <div className="reality-card-title" style={{ marginTop: "1rem" }}>Evidence Status</div>
+                      <ul className="evidence-list">
+                        {report.evidenceStatus.exists.map((item, idx) => (
+                          <li key={idx} className="evidence-item" style={{ color: "var(--accent-emerald)" }}>
+                            ✓ {item}
+                          </li>
+                        ))}
+                        {report.evidenceStatus.doesNotExist.map((item, idx) => (
+                          <li key={idx} className="evidence-item" style={{ color: "var(--accent-rose)" }}>
+                            ❌ {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="reality-card" style={{ marginTop: "1.5rem" }}>
+                    <div className="reality-card-title">Real Alternative Behaviors</div>
+                    <ul style={{ paddingLeft: "1.25rem", fontSize: "0.9rem", color: "var(--text-secondary)", display: "flex", flexDirection: "column", gap: "0.4rem", marginTop: "0.5rem" }}>
+                      {report.currentAlternatives.map((alt, idx) => (
+                        <li key={idx}>{alt}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </motion.div>
+
+                {/* 3. Validation Matrix */}
+                <motion.div className="report-section" whileInView viewport={{ once: true }} initial="hidden" animate="visible">
+                  <h3 className="section-title">
+                    <span>03.</span> Validation Matrix
+                  </h3>
+                  <p style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginBottom: "1rem" }}>
+                    Click the info icon or hover over any row to unlock the underlying AI justification.
+                  </p>
+                  <div className="matrix-card-container">
+                    {report.validationMatrix.map((row, idx) => {
+                      const isExpanded = expandedMatrixRow === row.dimension;
+                      return (
+                        <div key={idx} className="matrix-card" onMouseEnter={() => setExpandedMatrixRow(row.dimension)} onMouseLeave={() => setExpandedMatrixRow(null)} onClick={() => setExpandedMatrixRow(isExpanded ? null : row.dimension)} style={{ cursor: "pointer" }}>
+                          <div className="matrix-card-dimension">
+                            {row.dimension}
+                            <button className="info-trigger" title="View details">
+                              <svg className="info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </button>
+                          </div>
+                          <div className="matrix-card-score">{row.score}/10</div>
+                          <div className="matrix-card-bar">
+                            <div className="matrix-card-bar-fill" style={{ width: `${row.score * 10}%` }}></div>
+                          </div>
+                          {isExpanded && (
+                            <div className="matrix-card-justification">
+                              {row.why}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </motion.div>
 
                 {/* 4. Biggest Risk */}
-                 <motion.div className="report-section" whileInView viewport={{ once: true }} initial="hidden" animate="visible">
-                   <h3 className="section-title">
-                     <span>04.</span> Biggest Assumption
-                   </h3>
-                   <div className="risk-box">
-                     <div className="risk-title">Core Risk Assumption</div>
-                     <p className="risk-desc" style={{ fontWeight: 600, marginBottom: "0.75rem" }}>
-                       "{report.biggestRisk.assumption}"
-                     </p>
-                     <div className="risk-title" style={{ fontSize: "0.85rem", opacity: 0.85 }}>Failure Mode</div>
-                     <p className="risk-desc" style={{ fontSize: "0.9rem", color: "var(--text-secondary)" }}>
-                       {report.biggestRisk.failureScenario}
-                     </p>
-                   </div>
-                 </motion.div>
+                <motion.div className="report-section" whileInView viewport={{ once: true }} initial="hidden" animate="visible">
+                  <h3 className="section-title">
+                    <span>04.</span> Biggest Assumption
+                  </h3>
+                  <div className="risk-box">
+                    <div className="risk-title">Core Risk Assumption</div>
+                    <p className="risk-desc" style={{ fontWeight: 600, marginBottom: "0.75rem" }}>
+                      "{report.biggestRisk.assumption}"
+                    </p>
+                    <div className="risk-title" style={{ fontSize: "0.85rem", opacity: 0.85 }}>Failure Mode</div>
+                    <p className="risk-desc" style={{ fontSize: "0.9rem", color: "var(--text-secondary)" }}>
+                      {report.biggestRisk.failureScenario}
+                    </p>
+                  </div>
+                </motion.div>
 
                 {/* 5. Validation Sprint (UNFINISHED UX) */}
-                 <motion.div className="report-section" style={{ borderBottom: "none", paddingBottom: 0 }} whileInView viewport={{ once: true }} initial="hidden" animate="visible">
-                   <h3 className="section-title">
-                     <span>05.</span> Validation Sprint (7 Days)
-                   </h3>
-                   <p style={{ fontSize: "0.85rem", color: "var(--accent-rose)", fontWeight: 500, marginBottom: "1rem" }}>
-                     ⚠️ STATUS: PENDING EXECUTION — COMPLETE THE TASKS BELOW
-                   </p>
-                   
-                   <div className="reality-card" style={{ marginBottom: "1.5rem" }}>
-                     <div className="reality-card-title">Assigned Experiment</div>
-                     <p style={{ fontSize: "1rem", fontWeight: 600, color: "var(--text-primary)" }}>
-                       {report.validationSprint.experiment}
-                     </p>
-                   </div>
- 
-                   <div className="sprint-checklist">
-                     {report.validationSprint.next3Actions.map((action, idx) => (
-                       <div key={idx} className="sprint-item">
-                         <div 
-                           className={`sprint-checkbox ${checkedSprintItems[idx] ? "checked" : ""}`}
-                           onClick={() => toggleSprintItem(idx)}
-                         ></div>
-                         <div className="sprint-checkbox-desc">
-                           {action}
-                           <span>Action Step {idx + 1}</span>
-                         </div>
-                       </div>
-                     ))}
-                   </div>
- 
-                   <div className="sprint-badge-container">
-                     <div className="sprint-badge">
-                       <span className="sprint-badge-label">Target Metrics:</span>
-                       <span className="sprint-badge-value">{report.validationSprint.successCriteria}</span>
-                     </div>
-                     <div className="sprint-badge">
-                       <span className="sprint-badge-label">Commitment Check-In:</span>
-                       <span className="sprint-badge-value">
-                         {new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString(undefined, {
-                           month: "short",
-                           day: "numeric",
-                           year: "numeric"
-                         })}
-                       </span>
-                     </div>
-                   </div>
- 
-                   <div className="reality-card" style={{ marginTop: "1.5rem" }}>
-                     <div className="reality-card-title">Required Evidence to Log</div>
-                     <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)", lineHeight: 1.4 }}>
-                       {report.validationSprint.requiredEvidence}
-                     </p>
-                   </div>
-                 </motion.div>
+                <motion.div className="report-section" style={{ borderBottom: "none", paddingBottom: 0 }} whileInView viewport={{ once: true }} initial="hidden" animate="visible">
+                  <h3 className="section-title">
+                    <span>05.</span> Validation Sprint (7 Days)
+                  </h3>
+                  <p style={{ fontSize: "0.85rem", color: "var(--accent-rose)", fontWeight: 500, marginBottom: "1rem" }}>
+                    ⚠️ STATUS: PENDING EXECUTION — COMPLETE THE TASKS BELOW
+                  </p>
+
+                  <div className="reality-card" style={{ marginBottom: "1.5rem" }}>
+                    <div className="reality-card-title">Assigned Experiment</div>
+                    <p style={{ fontSize: "1rem", fontWeight: 600, color: "var(--text-primary)" }}>
+                      {report.validationSprint.experiment}
+                    </p>
+                  </div>
+
+                  <div className="sprint-checklist">
+                    {report.validationSprint.next3Actions.map((action, idx) => (
+                      <div key={idx} className="sprint-item">
+                        <div
+                          className={`sprint-checkbox ${checkedSprintItems[idx] ? "checked" : ""}`}
+                          onClick={() => toggleSprintItem(idx)}
+                        ></div>
+                        <div className="sprint-checkbox-desc">
+                          {action}
+                          <span>Action Step {idx + 1}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="sprint-badge-container">
+                    <div className="sprint-badge">
+                      <span className="sprint-badge-label">Target Metrics:</span>
+                      <span className="sprint-badge-value">{report.validationSprint.successCriteria}</span>
+                    </div>
+                    <div className="sprint-badge">
+                      <span className="sprint-badge-label">Commitment Check-In:</span>
+                      <span className="sprint-badge-value">
+                        {new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString(undefined, {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric"
+                        })}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="reality-card" style={{ marginTop: "1.5rem" }}>
+                    <div className="reality-card-title">Required Evidence to Log</div>
+                    <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)", lineHeight: 1.4 }}>
+                      {report.validationSprint.requiredEvidence}
+                    </p>
+                  </div>
+                </motion.div>
 
                 {/* Claiming/Save report flow */}
                 {!user && (
@@ -743,50 +745,50 @@ export default function Home() {
               </div>
             )}
           </div>
-        </div>
+        </motion.div>
 
         {/* Longitudinal Timeline Mock Section for V1 Demo */}
         {report && (
-           <motion.div className="dashboard-grid" style={{ marginTop: "1rem" }} whileInView viewport={{ once: true }} initial="hidden" animate="visible">
-             <div className="card timeline-card">
-               <h2 className="form-title">Longitudinal Validation History</h2>
-               <p className="form-subtitle">
-                 This per-user, per-idea timeline tracks pivots, experiment completion logs, and weekly accountability checks. (Setup for v2/v3 check-in engine)
-               </p>
+          <motion.div className="dashboard-grid" style={{ marginTop: "1rem" }} whileInView viewport={{ once: true }} initial="hidden" animate="visible">
+            <div className="card timeline-card">
+              <h2 className="form-title">Longitudinal Validation History</h2>
+              <p className="form-subtitle">
+                This per-user, per-idea timeline tracks pivots, experiment completion logs, and weekly accountability checks. (Setup for v2/v3 check-in engine)
+              </p>
 
-               <div className="timeline-list">
-                 <div className="timeline-node active">
-                   <div className="timeline-date">TODAY</div>
-                   <div className="timeline-title">Validation Sprint Initiated</div>
-                   <div className="timeline-desc">
-                     Generated initial onboarding report. Assigned 48h experiment: <strong>{report.validationSprint.experiment}</strong>. Target success metrics set.
-                   </div>
-                 </div>
+              <div className="timeline-list">
+                <div className="timeline-node active">
+                  <div className="timeline-date">TODAY</div>
+                  <div className="timeline-title">Validation Sprint Initiated</div>
+                  <div className="timeline-desc">
+                    Generated initial onboarding report. Assigned 48h experiment: <strong>{report.validationSprint.experiment}</strong>. Target success metrics set.
+                  </div>
+                </div>
 
-                 <div className="timeline-node">
-                   <div className="timeline-date">7 DAYS FROM TODAY</div>
-                   <div className="timeline-title">Weekly Check-in #1 (Scheduled)</div>
-                   <div className="timeline-desc">
-                     Founder must submit verification evidence: {report.validationSprint.requiredEvidence}.
-                   </div>
-                 </div>
-               </div>
-             </div>
+                <div className="timeline-node">
+                  <div className="timeline-date">7 DAYS FROM TODAY</div>
+                  <div className="timeline-title">Weekly Check-in #1 (Scheduled)</div>
+                  <div className="timeline-desc">
+                    Founder must submit verification evidence: {report.validationSprint.requiredEvidence}.
+                  </div>
+                </div>
+              </div>
+            </div>
 
-             <div className="card">
-               <h3 className="sidebar-title">Startup Moat Engine</h3>
-               <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", lineHeight: 1.5, marginBottom: "1rem" }}>
-                 FounderAI builds longitudinal memory. Because reports are saved as structured data:
-               </p>
-               <ul style={{ fontSize: "0.85rem", color: "var(--text-secondary)", paddingLeft: "1.25rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                 <li><strong>Week 2</strong> check-in queries previous assumptions automatically.</li>
-                 <li><strong>Pivots</strong> spawn child nodes off the parent idea node.</li>
-                 <li><strong>Timeline events</strong> preserve the history, proving to future investors you validate before writing code.</li>
-               </ul>
-             </div>
-           </motion.div>
+            <div className="card">
+              <h3 className="sidebar-title">Startup Moat Engine</h3>
+              <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", lineHeight: 1.5, marginBottom: "1rem" }}>
+                FounderAI builds longitudinal memory. Because reports are saved as structured data:
+              </p>
+              <ul style={{ fontSize: "0.85rem", color: "var(--text-secondary)", paddingLeft: "1.25rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                <li><strong>Week 2</strong> check-in queries previous assumptions automatically.</li>
+                <li><strong>Pivots</strong> spawn child nodes off the parent idea node.</li>
+                <li><strong>Timeline events</strong> preserve the history, proving to future investors you validate before writing code.</li>
+              </ul>
+            </div>
+          </motion.div>
         )}
-      </main>
+      </main >
 
       <footer style={{ borderTop: "1px solid var(--border-color)", padding: "2rem 0", color: "var(--text-muted)", fontSize: "0.8rem", textAlign: "center", marginTop: "auto" }}>
         <div className="container">
