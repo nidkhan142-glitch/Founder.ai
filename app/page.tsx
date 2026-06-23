@@ -341,7 +341,7 @@ export default function Home() {
 
         <motion.div
           className="onboarding-grid"
-          whileInView
+          whileInView="visible"
           viewport={{ once: true }}
           initial="hidden"
           animate="visible"
@@ -512,7 +512,7 @@ export default function Home() {
                 {/* 1. Founder Verdict */}
                 <motion.div
                   className="report-header"
-                  whileInView
+                  whileInView="visible"
                   viewport={{ once: true }}
                   initial="hidden"
                   animate="visible"
@@ -532,13 +532,13 @@ export default function Home() {
                   </span>
                 </motion.div>
 
-                <motion.div className="must-be-true-box" whileInView viewport={{ once: true }} initial="hidden" animate="visible">
+                <motion.div className="must-be-true-box" whileInView="visible" viewport={{ once: true }} initial="hidden" animate="visible">
                   <div className="must-be-true-title">What Must Be True to Proceed</div>
                   <div className="must-be-true-text">"{report.whatMustBeTrue}"</div>
                 </motion.div>
 
                 {/* 2. Reality Check */}
-                <motion.div className="report-section" whileInView viewport={{ once: true }} initial="hidden" animate="visible">
+                <motion.div className="report-section" whileInView="visible" viewport={{ once: true }} initial="hidden" animate="visible">
                   <h3 className="section-title">
                     <span>02.</span> Reality Check
                   </h3>
@@ -585,7 +585,7 @@ export default function Home() {
                 </motion.div>
 
                 {/* 3. Validation Matrix */}
-                <motion.div className="report-section" whileInView viewport={{ once: true }} initial="hidden" animate="visible">
+                <motion.div className="report-section" whileInView="visible" viewport={{ once: true }} initial="hidden" animate="visible">
                   <h3 className="section-title">
                     <span>03.</span> Validation Matrix
                   </h3>
@@ -621,7 +621,7 @@ export default function Home() {
                 </motion.div>
 
                 {/* 4. Biggest Risk */}
-                <motion.div className="report-section" whileInView viewport={{ once: true }} initial="hidden" animate="visible">
+                <motion.div className="report-section" whileInView="visible" viewport={{ once: true }} initial="hidden" animate="visible">
                   <h3 className="section-title">
                     <span>04.</span> Biggest Assumption
                   </h3>
@@ -638,7 +638,7 @@ export default function Home() {
                 </motion.div>
 
                 {/* 5. Validation Sprint (UNFINISHED UX) */}
-                <motion.div className="report-section" style={{ borderBottom: "none", paddingBottom: 0 }} whileInView viewport={{ once: true }} initial="hidden" animate="visible">
+                <motion.div className="report-section" style={{ borderBottom: "none", paddingBottom: 0 }} whileInView="visible" viewport={{ once: true }} initial="hidden" animate="visible">
                   <h3 className="section-title">
                     <span>05.</span> Validation Sprint (7 Days)
                   </h3>
@@ -749,7 +749,7 @@ export default function Home() {
 
         {/* Longitudinal Timeline Mock Section for V1 Demo */}
         {report && (
-          <motion.div className="dashboard-grid" style={{ marginTop: "1rem" }} whileInView viewport={{ once: true }} initial="hidden" animate="visible">
+          <motion.div className="dashboard-grid" style={{ marginTop: "1rem" }} whileInView="visible" viewport={{ once: true }} initial="hidden" animate="visible">
             <div className="card timeline-card">
               <h2 className="form-title">Longitudinal Validation History</h2>
               <p className="form-subtitle">
