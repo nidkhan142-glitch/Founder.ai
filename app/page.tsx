@@ -93,7 +93,7 @@ export default function Home() {
   // Check for session & local settings on mount
   useEffect(() => {
     // Load custom API key from localStorage if present
-    const savedKey = localStorage.getItem("founder_gemini_api_key");
+    const savedKey = localStorage.getItem("founder_openrouter_api_key");
     if (savedKey) {
       setCustomApiKey(savedKey);
     }
@@ -132,7 +132,7 @@ export default function Home() {
 
   const handleSaveApiKey = (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem("founder_gemini_api_key", customApiKey);
+    localStorage.setItem("founder_openrouter_api_key", customApiKey);
     setShowSettings(false);
   };
 
@@ -312,20 +312,19 @@ export default function Home() {
           </div>
         </div>
       </header>
-
       <main className="container">
         {showSettings && (
           <div style={{ marginTop: "1.5rem" }} className="card">
             <h3 className="sidebar-title">Developer Settings</h3>
             <p className="form-subtitle">
-              FounderAI requires a Gemini API Key. Populate your `GEMINI_API_KEY` in `.env.local` or enter one locally in the browser storage here.
+              FounderAI requires an OpenRouter API Key. Add your key to OPENROUTER_API_KEY in .env.local or enter it here for local testing.
             </p>
             <form onSubmit={handleSaveApiKey}>
               <div className="form-group">
-                <label className="form-label">Gemini API Key</label>
+                <label className="form-label">OpenRouter API Key</label>
                 <input
                   type="password"
-                  placeholder="AIzaSy..."
+                  placeholder="sk-or-..."
                   className="form-input"
                   value={customApiKey}
                   onChange={(e) => setCustomApiKey(e.target.value)}

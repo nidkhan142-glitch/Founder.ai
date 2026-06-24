@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 
 export async function POST(request: Request) {
   try {
@@ -13,94 +12,17 @@ export async function POST(request: Request) {
       whyYou,
       evidence,
       goal,
-      customApiKey // Allow developer/user to supply their own key in UI if env variable is missing
+      customApiKey
     } = body;
 
     // Check for API key
-    const apiKey = customApiKey || process.env.GEMINI_API_KEY;
+    const apiKey = customApiKey || process.env.OPENROUTER_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
-        { error: "Gemini API Key is missing. Please configure GEMINI_API_KEY in .env.local or enter it in the settings." },
+        { error: "OpenRouter API Key is missing. Please configure OPENROUTER_API_KEY in .env.local" },
         { status: 400 }
       );
     }
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-
-    // Using gemini-2.0-flash which supports structured outputs and is stable
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: SchemaType.OBJECT,
-          properties: {
-            verdict: { type: SchemaType.STRING, enum: ["Proceed", "Pivot", "Abandon"], format: "enum" },
-            confidence: { type: SchemaType.STRING, enum: ["High", "Medium", "Low"], format: "enum" },
-            whatMustBeTrue: { type: SchemaType.STRING, description: "ONE specific, falsifiable claim — a measurable threshold that, if true, means this idea has legs." },
-            problemConfidence: { type: SchemaType.INTEGER, description: "Score out of 10" },
-            problemConfidenceJustification: { type: SchemaType.STRING, description: "One-sentence justification for the problem confidence score." },
-            first10Customers: { type: SchemaType.STRING, description: "One specific, narrow real-world group. Do not use generic demographics." },
-            currentAlternatives: {
-              type: SchemaType.ARRAY,
-              items: { type: SchemaType.STRING },
-              description: "3 to 5 things people actually do instead (behaviors, e.g. doing nothing, using spreadsheets)"
-            },
-            evidenceStatus: {
-              type: SchemaType.OBJECT,
-              properties: {
-                exists: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING }, description: "Evidence that exists" },
-                doesNotExist: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING }, description: "Evidence that DOES NOT exist" }
-              },
-              required: ["exists", "doesNotExist"]
-            },
-            validationMatrix: {
-              type: SchemaType.ARRAY,
-              items: {
-                type: SchemaType.OBJECT,
-                properties: {
-                  dimension: { type: SchemaType.STRING, enum: ["Problem Severity", "Customer Urgency", "Market Accessibility", "Competition Risk", "Founder Advantage"], format: "enum" },
-                  score: { type: SchemaType.INTEGER, description: "Score out of 10" },
-                  why: { type: SchemaType.STRING, description: "Exactly one sentence justifying this score" }
-                },
-                required: ["dimension", "score", "why"]
-              }
-            },
-            biggestRisk: {
-              type: SchemaType.OBJECT,
-              properties: {
-                assumption: { type: SchemaType.STRING, description: "The single highest-risk assumption the idea depends on" },
-                failureScenario: { type: SchemaType.STRING, description: "One sentence describing the specific, realistic way this fails" }
-              },
-              required: ["assumption", "failureScenario"]
-            },
-            validationSprint: {
-              type: SchemaType.OBJECT,
-              properties: {
-                experiment: { type: SchemaType.STRING, description: "A real-world test (interviews, smoke-test landing page, concierge MVP) — NOT 'build an MVP'" },
-                successCriteria: { type: SchemaType.STRING, description: "A measurable, falsifiable threshold" },
-                next3Actions: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING }, description: "3 concrete, actionable steps numbered" },
-                requiredEvidence: { type: SchemaType.STRING, description: "What the user must bring back (e.g., interview notes, metrics)" }
-              },
-              required: ["experiment", "successCriteria", "next3Actions", "requiredEvidence"]
-            }
-          },
-          required: [
-            "verdict",
-            "confidence",
-            "whatMustBeTrue",
-            "problemConfidence",
-            "problemConfidenceJustification",
-            "first10Customers",
-            "currentAlternatives",
-            "evidenceStatus",
-            "validationMatrix",
-            "biggestRisk",
-            "validationSprint"
-          ]
-        }
-      }
-    });
 
     const systemInstruction = `You are the validation engine inside FounderAI, an AI accountability system for first-time founders. You are not a cheerleader and you are not ChatGPT. Your job is to force intellectual honesty before someone wastes months building the wrong thing.
 
@@ -116,13 +38,44 @@ RULES:
   - If Goal = "College application portfolio," weight the verdict toward "is this demonstrably learnable/improvable, can they execute this validation to show leadership and execution capability," not just "is this a VC-fundable business."
   - If Goal = "Real business," weight toward market reality, customer acquisition costs, and actual commercial viability.
   - If Goal = "Side project," weight toward feasibility, personal enjoyment, and ease of no-code verification.
-  - If Goal = "Exploring a market," weight toward learning speed and density of feedback.`;
+  - If Goal = "Exploring a market," weight toward learning speed and density of feedback.
 
-    const userPrompt = `
-Analyze this startup idea based on the founder's onboarding answers:
+You MUST respond with ONLY a valid JSON object. No markdown, no backticks, no explanation. Just raw JSON matching this exact structure:
+{
+  "verdict": "Proceed" | "Pivot" | "Abandon",
+  "confidence": "High" | "Medium" | "Low",
+  "whatMustBeTrue": "string",
+  "problemConfidence": number (0-10),
+  "problemConfidenceJustification": "string",
+  "first10Customers": "string",
+  "currentAlternatives": ["string", "string", "string"],
+  "evidenceStatus": {
+    "exists": ["string"],
+    "doesNotExist": ["string"]
+  },
+  "validationMatrix": [
+    { "dimension": "Problem Severity", "score": number, "why": "string" },
+    { "dimension": "Customer Urgency", "score": number, "why": "string" },
+    { "dimension": "Market Accessibility", "score": number, "why": "string" },
+    { "dimension": "Competition Risk", "score": number, "why": "string" },
+    { "dimension": "Founder Advantage", "score": number, "why": "string" }
+  ],
+  "biggestRisk": {
+    "assumption": "string",
+    "failureScenario": "string"
+  },
+  "validationSprint": {
+    "experiment": "string",
+    "successCriteria": "string",
+    "next3Actions": ["string", "string", "string"],
+    "requiredEvidence": "string"
+  }
+}`;
+
+    const userPrompt = `Analyze this startup idea based on the founder's onboarding answers:
 
 Problem: "${problem}"
-Customer: "${customer}"
+Customer: "${customer}"   console.log("MODEL:", ""
 Current Solution: "${currentSolution}"
 Frequency: "${frequency}"
 Consequence: "${consequence}"
@@ -130,17 +83,51 @@ Why You: "${whyYou}"
 Evidence Level: "${evidence}" (Note: None means no interviews, 1-5 people means minimal signal, 6-20 people means moderate validation, 20+ means solid customer research)
 Goal: "${goal}"
 
-Output the structured analysis according to the schema rules.`;
+Output the structured JSON analysis now.`;
 
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-      systemInstruction: systemInstruction
+    console.log("OPENROUTER KEY EXISTS:", !!apiKey);
+    console.log("MODEL:", "deepseek/deepseek-r1-0528:free");
+    console.log("ABOUT TO CALL OPENROUTER");
+
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "openai/gpt-oss-120b:free",
+        messages: [
+          { role: "system", content: systemInstruction },
+          { role: "user", content: userPrompt }
+        ]
+      })
     });
 
-    const responseText = result.response.text();
-    const parsedData = JSON.parse(responseText);
+    console.log("OPENROUTER RESPONSE STATUS:", response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+
+      console.error("OPENROUTER RAW ERROR:");
+      console.error(errorText);
+
+      throw new Error(errorText);
+    }
+
+    const data = await response.json();
+
+    console.log("OPENROUTER SUCCESS:");
+    console.log(JSON.stringify(data, null, 2));
+
+    const responseText = data.choices[0].message.content;
+
+    // Clean response in case model wraps in markdown
+    const cleaned = responseText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+    const parsedData = JSON.parse(cleaned);
 
     return NextResponse.json(parsedData);
+
   } catch (error: any) {
     console.error("Validation engine error:", error);
     return NextResponse.json(
