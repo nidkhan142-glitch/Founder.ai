@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html class="scroll-smooth" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>FounderAI | Stop Wasting Months on Bad Ideas</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#ffb596",
+                        "secondary-fixed": "#d3e4fe",
+                        "on-surface-variant": "#434655",
+                        "surface-container": "#ededf9",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "outline": "#737686",
+                        "surface-container-high": "#e7e7f3",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed": "#ffdbcd",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "tertiary-container": "#bc4800",
+                        "primary-fixed": "#dbe1ff",
+                        "on-tertiary-container": "#ffede6",
+                        "inverse-surface": "#2e3039",
+                        "on-tertiary-fixed": "#360f00",
+                        "on-surface": "#191b23",
+                        "surface-bright": "#faf8ff",
+                        "surface": "#faf8ff",
+                        "on-tertiary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-primary-container": "#eeefff",
+                        "surface-container-highest": "#e1e2ed",
+                        "tertiary": "#943700",
+                        "surface-tint": "#0053db",
+                        "on-secondary-fixed": "#0b1c30",
+                        "secondary-container": "#d0e1fb",
+                        "surface-container-low": "#f3f3fe",
+                        "background": "#faf8ff",
+                        "surface-variant": "#e1e2ed",
+                        "on-primary": "#ffffff",
+                        "on-background": "#191b23",
+                        "on-secondary-container": "#54647a",
+                        "on-secondary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "surface-dim": "#d9d9e5",
+                        "error": "#ba1a1a",
+                        "primary-container": "#2563eb",
+                        "primary": "#004ac6",
+                        "outline-variant": "#c3c6d7",
+                        "secondary": "#505f76",
+                        "inverse-on-surface": "#f0f0fb",
+                        "on-primary-fixed": "#00174b",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "inverse-primary": "#b4c5ff",
+                        "brand-dark": "#1a1f2e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-max": "1280px",
+                        "xs": "4px",
+                        "sm": "8px",
+                        "xl": "48px",
+                        "gutter": "24px",
+                        "xxl": "80px",
+                        "base": "4px",
+                        "md": "16px",
+                        "lg": "24px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["14px", { "lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .hero-dashboard-container {
+            perspective: 2000px;
+        }
+
+        .hero-dashboard-screenshot {
+            transition: transform 0.2s cubic-bezier(0.03, 0.98, 0.52, 0.99);
+            transform-style: preserve-3d;
+            will-change: transform;
+        }
+
+        .logo-box {
+            background-color: #1a1f2e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+
+        .logo-triangle {
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 14px solid white;
+        }
+
+        .reveal-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal-on-scroll.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+
+<body class="bg-surface text-on-surface font-body-md selection:bg-primary-fixed selection:text-on-primary-fixed">
+
+    <!-- NAV -->
+    <nav id="main-nav"
+        class="fixed top-0 w-full z-50 border-b border-outline-variant/20 bg-white transition-transform duration-300">
+        <div class="flex justify-between items-center h-16 px-gutter max-w-container-max mx-auto">
+            <div class="flex items-center gap-2">
+                <div class="logo-box w-8 h-8">
+                    <div class="logo-triangle"></div>
+                </div>
+                <span class="font-bold text-lg text-on-surface" style="letter-spacing:-0.01em;">FounderAI</span>
+            </div>
+            <div class="hidden md:flex items-center gap-xl">
+                <a class="text-body-md text-on-surface-variant hover:text-primary transition-colors duration-200 no-underline"
+                    href="#how-it-works">How It Works</a>
+                <a id="nav-dashboard-link"
+                    class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors duration-200"
+                    href="/validate">Dashboard</a>
+                <a class="text-body-md text-on-surface-variant hover:text-primary transition-colors duration-200 no-underline"
+                    href="#validation-process">Validation Process</a>
+            </div>
+            <div class="flex items-center gap-md" id="nav-auth-section">
+                <a href="/validate"
+                    class="text-body-md text-on-surface-variant hover:text-primary transition-colors no-underline">Login</a>
+                <a href="/validate"
+                    class="bg-primary-container text-on-primary px-lg py-sm rounded-xl font-medium no-underline transition-transform active:scale-90">Sign
+                    Up</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="pt-lg pb-xxl relative overflow-hidden mt-16">
+        <div class="max-w-container-max mx-auto px-gutter text-center relative z-10">
+            <div
+                class="inline-flex items-center gap-2 px-md py-1.5 text-on-primary rounded-full mb-md bg-primary-container">
+                <span class="material-symbols-outlined text-[18px]">verified</span>
+                <span class="font-label-sm text-label-sm uppercase tracking-wider">AI Founder Operating System</span>
+            </div>
+            <h1
+                class="font-display-lg text-display-lg text-on-surface mb-6 max-w-3xl mx-auto leading-tight font-semibold">
+                Stop wasting months on <span class="text-primary font-extrabold">bad ideas.</span>
+            </h1>
+            <p class="font-body-lg text-body-lg text-gray-600 mb-xl max-w-2xl mx-auto">
+                FounderAI is the AI operating system for founders. Validate ideas, execute experiments, collect
+                evidence, and make better startup decisions—all in one place.
+            </p>
+            <div class="flex flex-col items-center gap-3">
+                <a href="/validate" id="hero-cta-btn"
+                    class="text-on-primary border border-transparent px-24 py-4 rounded-xl font-semibold shadow-lg shadow-primary/20 hover:opacity-90 transition-all bg-primary-container no-underline inline-flex items-center justify-center gap-2 text-lg">
+                    Validate My Idea <span class="material-symbols-outlined">arrow_forward</span>
+                </a>
+                <p class="font-body-sm text-body-sm text-outline text-center">
+                    No credit card required. Generate your first founder report in minutes.
+                </p>
+            </div>
+        </div>
+
+        <!-- Hero Dashboard Visual -->
+        <div class="max-w-container-max mx-auto px-gutter mt-xxl hero-dashboard-container">
+            <div id="hero-dash"
+                class="hero-dashboard-screenshot relative rounded-2xl border border-outline-variant/50 bg-[#F9FAFB] shadow-2xl overflow-hidden min-h-[600px] flex"
+                style="transform: rotateX(0deg) rotateY(0deg);">
+                <!-- Sidebar -->
+                <aside
+                    class="w-64 border-r border-outline-variant/30 bg-surface-container-low p-md hidden lg:flex flex-col gap-6">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="logo-box w-6 h-6">
+                            <div class="logo-triangle"
+                                style="border-left-width:6px;border-right-width:6px;border-bottom-width:10px;"></div>
+                        </div>
+                        <span class="font-bold text-on-surface">FounderAI</span>
+                    </div>
+                    <nav class="space-y-1">
+                        <div
+                            class="flex items-center gap-3 px-md py-2 text-on-primary rounded-lg font-medium bg-[#2563EB]">
+                            <span class="material-symbols-outlined"
+                                style='font-variation-settings:"FILL" 1;'>dashboard</span>
+                            Dashboard
+                        </div>
+                        <div
+                            class="flex items-center gap-3 px-md py-2 text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">
+                            <span class="material-symbols-outlined">lightbulb</span>Ideas
+                        </div>
+                        <div
+                            class="flex items-center gap-3 px-md py-2 text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">
+                            <span class="material-symbols-outlined">speed</span>Validation Sprint
+                        </div>
+                        <div
+                            class="flex items-center gap-3 px-md py-2 text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">
+                            <span class="material-symbols-outlined">folder</span>Evidence Vault
+                        </div>
+                    </nav>
+                    <div class="mt-auto space-y-1">
+                        <div
+                            class="flex items-center gap-3 px-md py-2 text-on-surface-variant hover:bg-surface-container rounded-lg">
+                            <span class="material-symbols-outlined">person</span>Founder Profile
+                        </div>
+                        <div
+                            class="flex items-center gap-3 px-md py-2 text-on-surface-variant hover:bg-surface-container rounded-lg">
+                            <span class="material-symbols-outlined">settings</span>Settings
+                        </div>
+                    </div>
+                </aside>
+                <!-- Main Content -->
+                <main class="flex-1 p-xl text-left bg-[#F9FAFB] relative">
+                    <header class="flex justify-between items-center mb-xl">
+                        <h2 class="font-headline-md text-headline-md">Founder Dashboard</h2>
+                        <div
+                            class="px-md py-1.5 bg-tertiary-fixed text-on-tertiary-fixed rounded-full flex items-center gap-2">
+                            <span class="w-2 h-2 bg-tertiary rounded-full animate-pulse"></span>
+                            <span class="font-label-sm">Active Sprint: Day 4</span>
+                        </div>
+                    </header>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md mb-xl">
+                        <div class="p-md bg-surface-container-lowest border border-outline-variant rounded-xl">
+                            <p class="text-outline font-label-sm uppercase mb-1">Current Idea</p>
+                            <p class="font-semibold text-on-surface">AI Interview Coach</p>
+                        </div>
+                        <div class="p-md bg-surface-container-lowest border border-outline-variant rounded-xl">
+                            <p class="text-outline font-label-sm uppercase mb-1">Validation Verdict</p>
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-error text-[20px]">warning</span>
+                                <p class="font-semibold text-error">Pivot</p>
+                            </div>
+                        </div>
+                        <div class="p-md bg-surface-container-lowest border border-outline-variant rounded-xl">
+                            <p class="text-outline font-label-sm uppercase mb-1">Days Remaining</p>
+                            <p class="font-semibold text-on-surface">4 Days Left</p>
+                        </div>
+                        <div class="p-md bg-surface-container-lowest border border-outline-variant rounded-xl">
+                            <p class="text-outline font-label-sm uppercase mb-1">Evidence</p>
+                            <p class="font-semibold text-on-surface">6/15 Interviews</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-xl">
+                        <div class="lg:col-span-2 space-y-md">
+                            <div class="p-lg bg-surface-container border border-outline-variant rounded-2xl">
+                                <div class="flex justify-between items-start mb-md">
+                                    <div>
+                                        <span
+                                            class="font-label-sm px-2 py-0.5 bg-[#2563EB]/10 text-[#2563EB] rounded border border-[#2563EB]/20 uppercase">IN
+                                            PROGRESS</span>
+                                        <h3 class="font-headline-md mt-2">Targeted User Research</h3>
+                                    </div>
+                                    <span class="font-label-md text-error">3 Days Remaining</span>
+                                </div>
+                                <p class="text-on-surface-variant mb-md">Task: Interview 15 first-year computer science
+                                    students about internship preparation.</p>
+                                <div class="w-full bg-outline-variant/30 h-2 rounded-full mb-2 overflow-hidden">
+                                    <div class="bg-[#2563EB] h-full" style="width:40%"></div>
+                                </div>
+                                <div class="flex justify-between font-label-sm text-outline">
+                                    <span class="text-[#2563EB] font-medium">40% Progress</span>
+                                    <span>6 of 15 Verified</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-md">
+                            <div class="p-lg bg-error-container/30 border border-error/20 rounded-2xl">
+                                <div class="flex items-center gap-2 mb-2 text-error">
+                                    <span class="material-symbols-outlined text-[20px]">psychology</span>
+                                    <h4 class="font-label-md">Core Risk Assumption</h4>
+                                </div>
+                                <p class="text-body-sm font-medium">Students will pay for structured interview
+                                    preparation and mentorship.</p>
+                            </div>
+                            <div class="p-lg bg-[#2563EB] text-white rounded-2xl">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="material-symbols-outlined text-[20px] text-white">auto_awesome</span>
+                                    <h4 class="font-label-md text-white">FounderAI Insight</h4>
+                                </div>
+                                <p class="text-body-sm">72% currently use free resources. Payment willingness unproven
+                                    through current evidence.</p>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROBLEM SECTION — Most founders build first -->
+    <section class="py-xxl bg-on-surface">
+        <div class="max-w-container-max mx-auto px-gutter">
+            <h2 class="font-display-lg text-display-lg text-surface-bright mb-xl text-center">Most founders build first.
+            </h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-xl relative">
+                <!-- Traditional Path -->
+                <div class="p-xl rounded-2xl bg-on-surface-variant/20 border border-outline/20">
+                    <span class="text-error font-label-md mb-4 block uppercase tracking-widest">Traditional Founder
+                        Path</span>
+                    <div class="space-y-md">
+                        <div class="flex items-center gap-4 text-surface-dim opacity-50">
+                            <span
+                                class="w-8 h-8 rounded-full border border-surface-dim flex items-center justify-center">1</span>
+                            <span class="font-body-lg">Vague Idea</span>
+                        </div>
+                        <div class="flex items-center gap-4 text-surface-dim opacity-50">
+                            <span
+                                class="w-8 h-8 rounded-full border border-surface-dim flex items-center justify-center">2</span>
+                            <span class="font-body-lg">Build (3-6 Months)</span>
+                        </div>
+                        <div class="flex items-center gap-4 text-surface-dim opacity-50">
+                            <span
+                                class="w-8 h-8 rounded-full border border-surface-dim flex items-center justify-center">3</span>
+                            <span class="font-body-lg">Launch to Silence</span>
+                        </div>
+                        <div class="flex items-center gap-4 text-error pt-4 border-t border-outline/20">
+                            <span class="material-symbols-outlined">cancel</span>
+                            <span class="font-headline-md font-bold">No Users. Total Failure.</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- FounderAI Path -->
+                <div class="p-xl rounded-2xl bg-primary/10 border border-primary/30 relative">
+                    <div
+                        class="absolute -top-4 -right-4 bg-primary text-on-primary px-4 py-1 rounded-full font-label-sm">
+                        THE WINNING PATH</div>
+                    <span class="text-primary-fixed font-label-md mb-4 block uppercase tracking-widest">FounderAI
+                        Path</span>
+                    <div class="space-y-md">
+                        <div class="flex items-center gap-4 text-surface-bright">
+                            <span
+                                class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">1</span>
+                            <span class="font-body-lg">Idea Submission</span>
+                        </div>
+                        <div class="flex items-center gap-4 text-surface-bright">
+                            <span
+                                class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">2</span>
+                            <span class="font-body-lg">7-Day Validation Sprint</span>
+                        </div>
+                        <div class="flex items-center gap-4 text-surface-bright">
+                            <span
+                                class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">3</span>
+                            <span class="font-body-lg">Evidence Gathering</span>
+                        </div>
+                        <div class="flex items-center gap-4 text-primary-fixed pt-4 border-t border-outline/20">
+                            <span class="material-symbols-outlined">check_circle</span>
+                            <span class="font-headline-md font-bold">Confidence to Build or Pivot</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Reveal text -->
+            <div class="mt-xxl text-center reveal-on-scroll">
+                <p class="font-display-lg text-display-lg text-surface-bright leading-tight">
+                    Building isn't expensive. <br />
+                    <span class="text-outline">Building the wrong thing is.</span>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="py-xxl bg-surface" id="how-it-works">
+        <div class="max-w-container-max mx-auto px-gutter">
+            <div class="text-center mb-xxl">
+                <h2 class="font-display-lg text-display-lg text-on-surface mb-md">How FounderAI Works</h2>
+                <p class="text-on-surface-variant max-w-xl mx-auto">We replace guesswork with a rigorous, scientific
+                    approach to startup building.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-lg">
+                <div
+                    class="p-xl bg-surface-container-lowest border border-outline-variant rounded-2xl hover:shadow-xl transition-all group">
+                    <div
+                        class="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center mb-md group-hover:bg-primary group-hover:text-on-primary transition-colors">
+                        <span class="material-symbols-outlined">edit_note</span>
+                    </div>
+                    <p class="font-label-sm text-outline mb-2">STEP 1</p>
+                    <h3 class="font-headline-md mb-md">Answer questions</h3>
+                    <p class="text-on-surface-variant">Tell us about your market, the problem, and your hypothesized
+                        solution in detail.</p>
+                </div>
+                <div
+                    class="p-xl bg-surface-container-lowest border border-outline-variant rounded-2xl hover:shadow-xl transition-all group">
+                    <div
+                        class="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center mb-md group-hover:bg-primary group-hover:text-on-primary transition-colors">
+                        <span class="material-symbols-outlined">description</span>
+                    </div>
+                    <p class="font-label-sm text-outline mb-2">STEP 2</p>
+                    <h3 class="font-headline-md mb-md">Receive report</h3>
+                    <p class="text-on-surface-variant">Our AI identifies your biggest risks and generates a custom
+                        validation blueprint.</p>
+                </div>
+                <div
+                    class="p-xl bg-surface-container-lowest border border-outline-variant rounded-2xl hover:shadow-xl transition-all group">
+                    <div
+                        class="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center mb-md group-hover:bg-primary group-hover:text-on-primary transition-colors">
+                        <span class="material-symbols-outlined">shutter_speed</span>
+                    </div>
+                    <p class="font-label-sm text-outline mb-2">STEP 3</p>
+                    <h3 class="font-headline-md mb-md">Complete sprint</h3>
+                    <p class="text-on-surface-variant">Follow a strict 7-day schedule of interviews, surveys, and
+                        landing page tests.</p>
+                </div>
+                <div
+                    class="p-xl bg-surface-container-lowest border border-outline-variant rounded-2xl hover:shadow-xl transition-all group">
+                    <div
+                        class="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center mb-md group-hover:bg-primary group-hover:text-on-primary transition-colors">
+                        <span class="material-symbols-outlined">analytics</span>
+                    </div>
+                    <p class="font-label-sm text-outline mb-2">STEP 4</p>
+                    <h3 class="font-headline-md mb-md">Collect evidence</h3>
+                    <p class="text-on-surface-variant">Get a final verdict based on real user data, not your own
+                        optimistic bias.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- REPORT PREVIEW -->
+    <section class="py-xxl bg-surface-container-low">
+        <div class="max-w-container-max mx-auto px-gutter">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-xxl items-center">
+                <div>
+                    <h2 class="font-display-lg text-display-lg text-on-surface mb-md">The Founder Report</h2>
+                    <p class="text-body-lg text-on-surface-variant mb-xl">A brutal, honest, and comprehensive breakdown
+                        of your startup's viability. We don't tell you what you want to hear; we tell you what you need
+                        to know.</p>
+                    <div class="space-y-md">
+                        <div class="flex items-start gap-4">
+                            <span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+                            <div>
+                                <p class="font-semibold">Risk Decomposition</p>
+                                <p class="text-body-sm text-on-surface-variant">We break your idea into 5-7 falsifiable
+                                    assumptions.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+                            <div>
+                                <p class="font-semibold">Competition Mapping</p>
+                                <p class="text-body-sm text-on-surface-variant">Deep dive into why existing solutions
+                                    might be "good enough".</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+                            <div>
+                                <p class="font-semibold">Sprint Instructions</p>
+                                <p class="text-body-sm text-on-surface-variant">Exactly who to talk to and what
+                                    questions to ask.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="report-mockup-container" style="perspective:2000px;">
+                    <div id="report-mockup"
+                        class="bg-white rounded-2xl shadow-xl border border-outline-variant overflow-hidden"
+                        style="transition:transform 0.2s cubic-bezier(0.03,0.98,0.52,0.99);transform-style:preserve-3d;will-change:transform;transform:rotateX(0deg) rotateY(0deg);">
+                        <div
+                            class="bg-surface-container px-lg py-md border-b border-outline-variant flex justify-between items-center">
+                            <span class="font-bold">VALIDATION REPORT</span>
+                            <span class="text-outline font-label-sm">#FA-2026-0082</span>
+                        </div>
+                        <div class="p-xl space-y-xl">
+                            <div
+                                class="flex justify-between items-center p-md bg-error/5 border border-error/10 rounded-xl">
+                                <div>
+                                    <p class="font-label-sm text-error">VERDICT</p>
+                                    <p class="font-headline-md text-error">Pivot Required</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-label-sm text-outline">CONFIDENCE</p>
+                                    <p class="font-bold">Medium (64%)</p>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="font-label-sm text-outline mb-md uppercase">Biggest Assumption</p>
+                                <p
+                                    class="font-body-lg text-on-surface p-md bg-surface-container-lowest border border-outline-variant rounded-xl">
+                                    "Students will pay $29/mo for automated interview prep when free alternatives
+                                    exist."
+                                </p>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+                                <div class="space-y-md">
+                                    <p class="font-label-sm text-outline uppercase">Required Evidence</p>
+                                    <ul class="space-y-2">
+                                        <li class="flex items-center gap-2 text-body-sm">
+                                            <span
+                                                class="material-symbols-outlined text-primary text-[18px]">rule</span>5
+                                            Signed LOIs
+                                        </li>
+                                        <li class="flex items-center gap-2 text-body-sm">
+                                            <span
+                                                class="material-symbols-outlined text-primary text-[18px]">rule</span>10
+                                            Verified interview clips
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="space-y-md">
+                                    <p class="font-label-sm text-outline uppercase">Day 1 Sprint</p>
+                                    <p class="text-body-sm italic">"Recruit 15 CS students for empathy interviews. Do
+                                        NOT mention the solution yet."</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </section>
+
+    <!-- WHY FOUNDERS COME BACK -->
+    <section class="py-xxl bg-surface">
+        <div class="max-w-container-max mx-auto px-gutter">
+            <div class="text-center mb-xxl">
+                <h2 class="font-headline-lg text-headline-lg mb-md">Why Founders Come Back</h2>
+                <p class="text-on-surface-variant">We aren't just a report generator; we are your validation OS.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-xl">
+                <div class="p-xl bg-surface-container-low rounded-2xl text-center space-y-md">
+                    <span class="material-symbols-outlined text-[48px] text-primary">groups</span>
+                    <h3 class="font-headline-md">Accountability</h3>
+                    <p class="text-on-surface-variant">7-day sprints keep you moving. No more "thinking about it" for
+                        months on end.</p>
+                </div>
+                <div class="p-xl bg-surface-container-low rounded-2xl text-center space-y-md">
+                    <span class="material-symbols-outlined text-[48px] text-primary"
+                        style='font-variation-settings:"FILL" 1;'>fact_check</span>
+                    <h3 class="font-headline-md">Evidence</h3>
+                    <p class="text-on-surface-variant">Store all interviews, survey data, and landing page metrics in
+                        one centralized vault.</p>
+                </div>
+                <div class="p-xl bg-surface-container-low rounded-2xl text-center space-y-md">
+                    <span class="material-symbols-outlined text-[48px] text-primary">trending_up</span>
+                    <h3 class="font-headline-md">Progress</h3>
+                    <p class="text-on-surface-variant">Watch your confidence score rise as you gather real-world data
+                        points.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- YOUR JOURNEY -->
+    <section class="py-xxl bg-surface-container-highest/30 scroll-mt-20" id="validation-process">
+        <div class="max-w-container-max mx-auto px-gutter">
+            <h2 class="font-headline-md text-headline-md text-center mb-xxl">Your Journey to Evidence</h2>
+            <div class="flex flex-col lg:flex-row items-center justify-between gap-xl relative">
+                <div class="hidden lg:block absolute top-1/2 left-0 w-full h-px bg-outline-variant/50 -z-10"></div>
+                <div class="flex flex-col items-center text-center gap-4 group">
+                    <div
+                        class="w-16 h-16 rounded-full bg-white border-2 border-primary text-primary flex items-center justify-center font-bold text-xl group-hover:bg-primary group-hover:text-on-primary transition-all">
+                        1</div>
+                    <p class="font-label-md">Create Account</p>
+                </div>
+                <div class="flex flex-col items-center text-center gap-4 group">
+                    <div
+                        class="w-16 h-16 rounded-full bg-white border border-outline-variant text-outline flex items-center justify-center font-bold text-xl group-hover:border-primary group-hover:text-primary transition-all">
+                        2</div>
+                    <p class="font-label-md">Validate Idea</p>
+                </div>
+                <div class="flex flex-col items-center text-center gap-4 group">
+                    <div
+                        class="w-16 h-16 rounded-full bg-white border border-outline-variant text-outline flex items-center justify-center font-bold text-xl group-hover:border-primary group-hover:text-primary transition-all">
+                        3</div>
+                    <p class="font-label-md">Generate Report</p>
+                </div>
+                <div class="flex flex-col items-center text-center gap-4 group">
+                    <div
+                        class="w-16 h-16 rounded-full bg-white border border-outline-variant text-outline flex items-center justify-center font-bold text-xl group-hover:border-primary group-hover:text-primary transition-all">
+                        4</div>
+                    <p class="font-label-md">Save Report</p>
+                </div>
+                <div class="flex flex-col items-center text-center gap-4 group">
+                    <div
+                        class="w-16 h-16 rounded-full bg-white border border-outline-variant text-outline flex items-center justify-center font-bold text-xl group-hover:border-primary group-hover:text-primary transition-all">
+                        5</div>
+                    <p class="font-label-md">Open Dashboard</p>
+                </div>
+                <div class="flex flex-col items-center text-center gap-4 group">
+                    <div
+                        class="w-16 h-16 rounded-full bg-white border border-outline-variant text-outline flex items-center justify-center font-bold text-xl group-hover:border-primary group-hover:text-primary transition-all">
+                        6</div>
+                    <p class="font-label-md">Track Sprint</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FINAL CTA -->
+    <section class="py-xxl bg-primary overflow-hidden relative">
+        <div class="max-w-container-max mx-auto px-gutter text-center relative z-10">
+            <h2 class="font-display-lg text-display-lg text-on-primary mb-md">Validate before you build.</h2>
+            <p class="text-body-lg text-primary-fixed max-w-2xl mx-auto mb-xl font-medium">
+                The best founders don't start with code. They start with evidence. Join 5,000+ founders using FounderAI
+                to build better startups.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-md">
+                <a href="/validate"
+                    class="bg-white text-primary px-xxl py-4 rounded-xl font-bold hover:bg-primary-fixed transition-all hover:scale-105 active:scale-95 inline-block no-underline">Sign
+                    Up</a>
+                <a href="/validate"
+                    class="bg-primary-fixed/20 text-on-primary border border-primary-fixed/30 px-xxl py-4 rounded-xl font-bold hover:bg-primary-fixed/30 transition-all inline-block no-underline">Login</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER — fixed -->
+    <footer class="bg-surface-container-lowest py-xxl border-t border-outline-variant/20">
+        <div class="max-w-container-max mx-auto px-gutter">
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-md">
+                <div class="col-span-2 space-y-md">
+                    <div class="flex items-center gap-2">
+                        <div class="logo-box w-8 h-8">
+                            <div class="logo-triangle"></div>
+                        </div>
+                        <span class="text-headline-md font-headline-md font-bold text-on-surface">FounderAI</span>
+                    </div>
+                    <p class="text-body-sm text-on-surface-variant max-w-xs">Helping high-performance founders build
+                        evidence-based startups since 2026.</p>
+                </div>
+                <div>
+                    <p class="font-label-sm text-on-surface mb-md">Product</p>
+                    <ul class="space-y-sm">
+                        <li><a class="font-body-sm text-on-surface-variant hover:text-primary transition-colors no-underline"
+                                href="#how-it-works">How It Works</a></li>
+                        <li><a class="font-body-sm text-on-surface-variant hover:text-primary transition-colors no-underline"
+                                href="#">Pricing</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <p class="font-label-sm text-on-surface mb-md">Resources</p>
+                    <ul class="space-y-sm">
+                        <li><a class="font-body-sm text-on-surface-variant hover:text-primary transition-colors no-underline"
+                                href="#">Validation Reports</a></li>
+                        <li><a class="font-body-sm text-on-surface-variant hover:text-primary transition-colors no-underline"
+                                href="#">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <p class="font-label-sm text-on-surface mb-md">Legal</p>
+                    <ul class="space-y-sm">
+                        <li><a class="font-body-sm text-on-surface-variant hover:text-primary transition-colors no-underline"
+                                href="#">Privacy</a></li>
+                    </ul>
+                </div>
+                <div class="flex justify-end items-end col-span-2 lg:col-span-1">
+                    <p class="font-body-sm text-on-surface-variant">©FounderAI. Built on principles of The Mom Test &
+                        Lean Startup.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Navbar scroll hide/show
+        let lastScrollY = window.scrollY;
+        const mainNav = document.getElementById('main-nav');
+        window.addEventListener('scroll', () => {
+            const currentScrollY = window.scrollY;
+            if (currentScrollY > lastScrollY && currentScrollY > 80) {
+                mainNav.style.transform = 'translateY(-100%)';
+            } else {
+                mainNav.style.transform = 'translateY(0)';
+            }
+            lastScrollY = currentScrollY;
+        });
+
+        // Report mockup mouse tilt
+        const reportMockup = document.getElementById('report-mockup');
+        const reportContainer = document.getElementById('report-mockup-container');
+        if (reportContainer && reportMockup) {
+            reportContainer.addEventListener('mousemove', (e) => {
+                const rect = reportContainer.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const rotateX = ((y - rect.height / 2) / rect.height) * -6;
+                const rotateY = ((x - rect.width / 2) / rect.width) * 6;
+                reportMockup.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+            reportContainer.addEventListener('mouseleave', () => {
+                reportMockup.style.transform = 'rotateX(0deg) rotateY(0deg)';
+            });
+        }
+
+        // Dashboard mouse tilt
+        const heroDash = document.getElementById('hero-dash');
+        const heroContainer = document.querySelector('.hero-dashboard-container');
+        if (heroContainer && heroDash) {
+            heroContainer.addEventListener('mousemove', (e) => {
+                const rect = heroContainer.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const rotateX = ((y - rect.height / 2) / rect.height) * -6;
+                const rotateY = ((x - rect.width / 2) / rect.width) * 6;
+                heroDash.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+            heroContainer.addEventListener('mouseleave', () => {
+                heroDash.style.transform = 'rotateX(0deg) rotateY(0deg)';
+            });
+        }
+
+        // Scroll reveal
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('active');
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.reveal-on-scroll').forEach(el => observer.observe(el));
+
+        // Session-aware navbar
+        const SUPABASE_URL = "https://bbjziohphiumteulheab.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJianppb2hwaGl1bXRldWxoZWFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NzkxNDUsImV4cCI6MjA5NzU1NTE0NX0.-RDpxahBCsw01Y-6LhivRs5ly-AfAf_gr82ApeYYx_Y";
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        sb.auth.getSession().then(async ({ data }) => {
+            const navAuthSection = document.getElementById('nav-auth-section');
+            const dashboardLink = document.getElementById('nav-dashboard-link');
+            if (!navAuthSection) return;
+
+            if (data.session && data.session.user) {
+                const email = data.session.user.email;
+                const userId = data.session.user.id;
+
+                // Check if user has any existing idea
+                const { data: ideas } = await sb
+                    .from('ideas')
+                    .select('id')
+                    .eq('user_id', userId)
+                    .limit(1);
+
+                const hasIdea = ideas && ideas.length > 0;
+                const dashboardUrl = hasIdea ? '/dashboard' : '/validate';
+
+                // Update nav auth section (Login/Signup area)
+                const fullName = data.session.user.user_metadata?.full_name;
+                const displayName = fullName || email;
+                navAuthSection.innerHTML = `
+                    <span style="font-size:12px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; background:#dbe1ff; color:#003ea8; padding:6px 14px; border-radius:999px; border:1px solid #b4c5ff;">👋 ${displayName.toUpperCase()}</span>
+                `;
+                // Update middle nav Dashboard link too
+                if (dashboardLink) {
+                    dashboardLink.href = dashboardUrl;
+                }
+                // Update hero CTA button too
+                const heroCta = document.getElementById('hero-cta-btn');
+                if (heroCta) {
+                    heroCta.href = dashboardUrl;
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

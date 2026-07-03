@@ -8,7 +8,7 @@
   --bg-primary: #09090b;
   --bg-secondary: #121215;
   --bg-tertiary: #18181b;
-   
+
   --border-color: #27272a;
   --border-glow: #3f3f46;
 
@@ -34,7 +34,8 @@
   margin: 0;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   background-color: var(--bg-primary);
   color: var(--text-primary);
@@ -48,13 +49,16 @@ html, body {
 ::-webkit-scrollbar {
   width: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: var(--bg-primary);
 }
+
 ::-webkit-scrollbar-thumb {
   background: var(--border-color);
   border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
@@ -633,7 +637,8 @@ html, body {
   gap: 0.75rem;
   padding: 0.875rem;
   background-color: var(--bg-tertiary);
-  border: 1px dashed var(--border-color); /* Dashed border reinforces "unfinished" */
+  border: 1px dashed var(--border-color);
+  /* Dashed border reinforces "unfinished" */
   border-radius: 8px;
 }
 
@@ -815,9 +820,11 @@ html, body {
   0% {
     opacity: 0.6;
   }
+
   50% {
     opacity: 0.3;
   }
+
   100% {
     opacity: 0.6;
   }
@@ -838,6 +845,7 @@ html, body {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }

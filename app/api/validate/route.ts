@@ -33,7 +33,6 @@ RULES:
 - Always explicitly state what evidence does NOT exist, not just what does.
 - Identify exactly ONE biggest assumption. Do not list multiple. Pick the one that, if false, kills the idea.
 - The output must be concise and readable in under 90 seconds. Keep explanation sentences short and punchy.
-- The validation sprint must design experiments and scripts that adhere to "The Mom Test" rules: never ask hypothetical questions like "Would you buy X?" or "How much would you pay for Y?". Instead, focus on gathering data about their past behaviors, what they do now, and how much they spent to resolve it.
 - Goal context changes tone:
   - If Goal = "College application portfolio," weight the verdict toward "is this demonstrably learnable/improvable, can they execute this validation to show leadership and execution capability," not just "is this a VC-fundable business."
   - If Goal = "Real business," weight toward market reality, customer acquisition costs, and actual commercial viability.
@@ -63,19 +62,13 @@ You MUST respond with ONLY a valid JSON object. No markdown, no backticks, no ex
   "biggestRisk": {
     "assumption": "string",
     "failureScenario": "string"
-  },
-  "validationSprint": {
-    "experiment": "string",
-    "successCriteria": "string",
-    "next3Actions": ["string", "string", "string"],
-    "requiredEvidence": "string"
   }
 }`;
 
     const userPrompt = `Analyze this startup idea based on the founder's onboarding answers:
 
 Problem: "${problem}"
-Customer: "${customer}"   console.log("MODEL:", ""
+Customer: "${customer}"
 Current Solution: "${currentSolution}"
 Frequency: "${frequency}"
 Consequence: "${consequence}"
@@ -85,18 +78,25 @@ Goal: "${goal}"
 
 Output the structured JSON analysis now.`;
 
-    console.log("OPENROUTER KEY EXISTS:", !!apiKey);
-    console.log("MODEL:", "deepseek/deepseek-r1-0528:free");
-    console.log("ABOUT TO CALL OPENROUTER");
+    const groqApiKey = process.env.GROQ_API_KEY;
+    if (!groqApiKey) {
+      return NextResponse.json(
+        { error: "Groq API Key is missing. Please configure GROQ_API_KEY in .env.local" },
+        { status: 400 }
+      );
+    }
 
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    console.log("GROQ KEY EXISTS:", !!groqApiKey);
+    console.log("ABOUT TO CALL GROQ - CALL 1 (Report)");
+
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${groqApiKey}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "openai/gpt-oss-120b:free",
+        model: "openai/gpt-oss-120b",
         messages: [
           { role: "system", content: systemInstruction },
           { role: "user", content: userPrompt }
@@ -104,29 +104,127 @@ Output the structured JSON analysis now.`;
       })
     });
 
-    console.log("OPENROUTER RESPONSE STATUS:", response.status);
+    console.log("GROQ RESPONSE STATUS (Call 1):", response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
-
-      console.error("OPENROUTER RAW ERROR:");
+      console.error("GROQ RAW ERROR (Call 1):");
       console.error(errorText);
-
       throw new Error(errorText);
     }
 
     const data = await response.json();
-
-    console.log("OPENROUTER SUCCESS:");
-    console.log(JSON.stringify(data, null, 2));
-
     const responseText = data.choices[0].message.content;
 
-    // Clean response in case model wraps in markdown
     const cleaned = responseText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-    const parsedData = JSON.parse(cleaned);
+    const parsedReport = JSON.parse(cleaned);
 
-    return NextResponse.json(parsedData);
+    console.log("CALL 1 SUCCESS - Report parsed");
+
+    // ============================================
+    // CALL 2 — Generate 7-Day Sprint from FULL report
+    // ============================================
+
+    const sprintSystemInstruction = `You are the sprint-planning engine inside FounderAI. You take a complete startup validation report and turn it into a practical 7-day execution plan.
+
+RULES:
+- Use the ENTIRE report (verdict, validation matrix scores, biggest risk, evidence gaps) to decide what the founder should focus on each day. A low "Customer Urgency" score or high "Competition Risk" score should change what you assign.
+- Every single day's task must take a first-time founder 20 minutes or less to complete in one sitting. Never assign bulk asks like "interview 15 people" — instead assign ONE concrete action (e.g. "Send this message to ONE potential customer").
+- Tasks must follow The Mom Test: focus on past behavior and current spending, never hypothetical willingness-to-pay questions.
+- Each day should build on the evidence from the previous day conceptually, moving from problem-validation early in the week toward solution/pricing validation later in the week, UNLESS the report's evidence gaps suggest a different order is more urgent.
+- If the report's confidence is "Low" or verdict is "Abandon", the first 1-2 days should focus on a single sharp test of the biggest risk assumption before anything else.
+- Keep task descriptions short, specific, and actionable — one or two sentences max.
+
+You MUST respond with ONLY a valid JSON array of exactly 7 objects. No markdown, no backticks, no explanation. Match this exact structure:
+[
+  {
+    "day": number (1-7),
+    "title": "string (short label, e.g. 'Customer Discovery')",
+    "task": "string (the specific action, ≤20 min)",
+    "estimated_minutes": number,
+    "evidence_reward": number (5-15, reflects how much this moves confidence),
+    "status": "pending"
+  }
+]`;
+
+    const sprintUserPrompt = `Original idea context:
+Problem: "${problem}"
+Customer: "${customer}"
+Current Solution: "${currentSolution}"
+Goal: "${goal}"
+
+Complete validation report:
+${JSON.stringify(parsedReport, null, 2)}
+
+Based on this complete validation report, create a practical 7-day execution sprint. Output the JSON array now.`;
+
+    console.log("ABOUT TO CALL OPENROUTER - CALL 2 (Sprint)");
+
+    let sprintDays: any[] = [];
+
+    try {
+      const sprintResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+          messages: [
+            { role: "system", content: sprintSystemInstruction },
+            { role: "user", content: sprintUserPrompt }
+          ]
+        })
+      });
+
+      if (!sprintResponse.ok) {
+        throw new Error(`Sprint call failed with status ${sprintResponse.status}`);
+      }
+
+      const sprintData = await sprintResponse.json();
+      const sprintText = sprintData.choices[0].message.content;
+      const sprintCleaned = sprintText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+      sprintDays = JSON.parse(sprintCleaned);
+
+      console.log("CALL 2 SUCCESS -", sprintDays.length, "days");
+
+    } catch (sprintError: any) {
+      console.error("CALL 2 FAILED (primary model), trying fallback:", sprintError.message);
+
+      try {
+        const fallbackResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model: "google/gemini-flash-1.5",
+            messages: [
+              { role: "system", content: sprintSystemInstruction },
+              { role: "user", content: sprintUserPrompt }
+            ]
+          })
+        });
+
+        const fallbackData = await fallbackResponse.json();
+        const fallbackText = fallbackData.choices[0].message.content;
+        const fallbackCleaned = fallbackText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+        sprintDays = JSON.parse(fallbackCleaned);
+
+        console.log("FALLBACK SUCCESS -", sprintDays.length, "days");
+
+      } catch (fallbackError: any) {
+        console.error("FALLBACK ALSO FAILED:", fallbackError.message);
+        sprintDays = [];
+      }
+    }
+
+    return NextResponse.json({
+      ...parsedReport,
+      sprint: sprintDays
+    });
 
   } catch (error: any) {
     console.error("Validation engine error:", error);
