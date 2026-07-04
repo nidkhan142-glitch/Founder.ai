@@ -21,21 +21,21 @@ export default function HeroSection() {
           </div>
           <div className={styles.assumption}>
             <span className={styles.label}>Biggest Assumption:</span>
-            <span className={styles.value >“Customers will pay for this solution.”</span>
-        </div>
-        <div className={styles.sprint}>
-          <span className={styles.label}>Current Sprint:</span>
-          <span className={styles.value}>Interview 10 founders</span>
-        </div>
-        <div className={styles.progress}>
-          <span className={styles.label}>Progress:</span>
-          <div className={styles.progressBar}>
-            <div className={styles.progressFill} style={{ width: '40%' }}></div>
+            <span className={styles.value}>Customers will pay for this solution.</span>
           </div>
-          <span className={styles.progressText}>40%</span>
+          <div className={styles.sprint}>
+            <span className={styles.label}>Current Sprint:</span>
+            <span className={styles.value}>Interview 10 founders</span>
+          </div>
+          <div className={styles.progress}>
+            <span className={styles.label}>Progress:</span>
+            <div className={styles.progressBar}>
+              <div className={styles.progressFill} style={{ width: '40%' }}></div>
+            </div>
+            <span className={styles.progressText}>40%</span>
+          </div>
         </div>
       </div>
-    </div>
     </section >
   );
 }
