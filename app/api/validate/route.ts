@@ -121,16 +121,19 @@ Output the structured JSON analysis now.`;
 
     console.log("CALL 1 SUCCESS - Report parsed");
 
-    // ============================================
+    // ==================================================
     // CALL 2 — Generate 7-Day Sprint from FULL report
-    // ============================================
+    // ==================================================
 
-    const sprintSystemInstruction = `You are the sprint-planning engine inside FounderAI. You take a complete startup validation report and turn it into a practical 7-day execution plan.
+    const sprintSystemInstruction = `You are the sprint-planning engine inside FounderAI. A founder has just received a full validation report — your job is to turn it into a 7-day plan of small, real-world actions that produce evidence for the Re-Evaluation Engine to judge later.
 
 RULES:
-- Use the ENTIRE report (verdict, validation matrix scores, biggest risk, evidence gaps) to decide what the founder should focus on each day. A low "Customer Urgency" score or high "Competition Risk" score should change what you assign.
+- Use the ENTIRE report (verdict, validation matrix scores, biggest risk, evidence gaps) to decide what the founder should focus on each day. A low Customer Urgency score or high Competition Risk score should change what you assign.
 - Every single day's task must take a first-time founder 20 minutes or less to complete in one sitting. Never assign bulk asks like "interview 15 people" — instead assign ONE concrete action (e.g. "Send this message to ONE potential customer").
-- Tasks must follow The Mom Test: focus on past behavior and current spending, never hypothetical willingness-to-pay questions.
+- Tasks must follow The Mom Test: focus on past behavior and current spending. NEVER use hypothetical-preference phrasing — banned: "would you pay," "what's the most you'd pay," "would you use," "what would make you switch." Instead ask about a real past instance ("walk me through the last time this happened") or assign a real low-effort commitment (waitlist, pre-order, LOI) and treat their action as the evidence.
+- Include at least one task asking why their current solution (from "Current Solution" in the idea context) isn't good enough, and what it would take for them to abandon it — status-quo inertia is usually the real competitor.
+- If the report shows low Customer Urgency or the problem happens monthly or less often, include a task that digs into one specific recent instance and its real cost in time or money, to test whether the pain is sharp enough to matter.
+- Across the 7 days, target distinct people where possible rather than repeating the same contact, unless a day is explicitly a structured follow-up to a prior day's contact. Rotate outreach channel/platform across the week instead of using the same one every day, so the evidence doesn't collapse if one channel underperforms.
 - Each day should build on the evidence from the previous day conceptually, moving from problem-validation early in the week toward solution/pricing validation later in the week, UNLESS the report's evidence gaps suggest a different order is more urgent.
 - If the report's confidence is "Low" or verdict is "Abandon", the first 1-2 days should focus on a single sharp test of the biggest risk assumption before anything else.
 - Keep task descriptions short, specific, and actionable — one or two sentences max.
@@ -145,18 +148,19 @@ You MUST respond with ONLY a valid JSON array of exactly 7 objects. No markdown,
     "evidence_reward": number (5-15, reflects how much this moves confidence),
     "status": "pending"
   }
-]`;
+]
+`;
 
     const sprintUserPrompt = `Original idea context:
-Problem: "${problem}"
-Customer: "${customer}"
+    Problem: "${problem}"
+    Customer: "${customer}"
 Current Solution: "${currentSolution}"
-Goal: "${goal}"
+    Goal: "${goal}"
 
 Complete validation report:
 ${JSON.stringify(parsedReport, null, 2)}
 
-Based on this complete validation report, create a practical 7-day execution sprint. Output the JSON array now.`;
+Based on this complete validation report, create a practical 7 - day execution sprint.Output the JSON array now.`;
 
     console.log("ABOUT TO CALL OPENROUTER - CALL 2 (Sprint)");
 
@@ -166,7 +170,7 @@ Based on this complete validation report, create a practical 7-day execution spr
       const sprintResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${apiKey}`,
+          Authorization: `Bearer ${apiKey} `,
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
@@ -179,13 +183,14 @@ Based on this complete validation report, create a practical 7-day execution spr
       });
 
       if (!sprintResponse.ok) {
-        throw new Error(`Sprint call failed with status ${sprintResponse.status}`);
+        throw new Error(`Sprint call failed with status ${sprintResponse.status} `);
       }
 
       const sprintData = await sprintResponse.json();
       const sprintText = sprintData.choices[0].message.content;
-      const sprintCleaned = sprintText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-      sprintDays = JSON.parse(sprintCleaned);
+      const match = sprintText.match(/\[[\s\S]*\]/);
+      if (!match) throw new Error("No JSON array found in primary response");
+      sprintDays = JSON.parse(match[0]);
 
       console.log("CALL 2 SUCCESS -", sprintDays.length, "days");
 
@@ -196,7 +201,7 @@ Based on this complete validation report, create a practical 7-day execution spr
         const fallbackResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${apiKey}`,
+            Authorization: `Bearer ${apiKey} `,
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
@@ -210,8 +215,9 @@ Based on this complete validation report, create a practical 7-day execution spr
 
         const fallbackData = await fallbackResponse.json();
         const fallbackText = fallbackData.choices[0].message.content;
-        const fallbackCleaned = fallbackText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-        sprintDays = JSON.parse(fallbackCleaned);
+        const fallbackMatch = fallbackText.match(/\[[\s\S]*\]/);
+        if (!fallbackMatch) throw new Error("No JSON array found in fallback response");
+        sprintDays = JSON.parse(fallbackMatch[0]);
 
         console.log("FALLBACK SUCCESS -", sprintDays.length, "days");
 
