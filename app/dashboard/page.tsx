@@ -71,6 +71,8 @@ export default function DashboardPage() {
     const [showSuccess, setShowSuccess] = useState(false);
     const [scoreBeforeSubmit, setScoreBeforeSubmit] = useState(0);
     const [approvalReason, setApprovalReason] = useState("");
+    const [reEvalResult, setReEvalResult] = useState<any>(null);
+    const [reEvalLoading, setReEvalLoading] = useState(false);
 
     useEffect(() => {
         if (supabase) {
@@ -324,26 +326,26 @@ export default function DashboardPage() {
             </header>
 
             {/* Main */}
-            <main className="dash-main" style={{ paddingTop: 96, paddingBottom: 48, paddingLeft: 32, paddingRight: 32, marginLeft: 240, minHeight: "100vh" }}>
+            <main className="dash-main" style={{ paddingTop: 80, paddingBottom: 24, paddingLeft: 32, paddingRight: 32, marginLeft: 240, minHeight: "100vh" }}>
                 <div style={{ maxWidth: 1440, margin: "0 auto" }}>
 
                     {/* ── DASHBOARD VIEW ── */}
                     {activeView === "dashboard" && (
                         <>
-                            <div style={{ marginBottom: 32 }}>
+                            <div style={{ marginBottom: 24 }}>
                                 <h1 style={{ fontSize: 36, letterSpacing: "-0.04em", fontWeight: 700, color: colors.onSurface, margin: 0 }}>Founder Dashboard</h1>
                                 <p style={{ fontSize: 16, color: colors.onSurfaceVariant, marginTop: 4 }}>Your only job today is to validate one assumption.</p>
                             </div>
 
                             {/* Summary Cards */}
-                            <div className="dash-summary-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24, marginBottom: 40 }}>
+                            <div className="dash-summary-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20, marginBottom: 24 }}>
                                 {[
                                     { label: "CURRENT IDEA", value: ideaLabel },
                                     { label: "VALIDATION VERDICT", value: report?.verdict || "—", isVerdict: true },
                                     { label: "DAYS REMAINING", value: allComplete ? "Sprint Done" : `${daysRemaining} Days Left` },
                                     { label: "EVIDENCE SCORE", value: `${evidenceScore}%`, isScore: true },
                                 ].map((card) => (
-                                    <div key={card.label} style={{ background: colors.surfaceContainerLowest, padding: 24, borderRadius: 12, border: `1px solid ${colors.outlineVariant}4D`, boxShadow: "0px 4px 20px rgba(0,0,0,0.03)" }}>
+                                    <div key={card.label} style={{ background: colors.surfaceContainerLowest, padding: 20, borderRadius: 12, border: `1px solid ${colors.outlineVariant}4D`, boxShadow: "0px 4px 20px rgba(0,0,0,0.03)" }}>
                                         <p style={{ fontSize: 12, letterSpacing: "0.05em", fontWeight: 600, textTransform: "uppercase" as const, color: colors.onSurfaceVariant, marginBottom: 8 }}>{card.label}</p>
                                         {card.isVerdict ? (
                                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -370,28 +372,76 @@ export default function DashboardPage() {
 
                             <div className="dash-main-grid" style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 24, alignItems: "start" }}>
                                 {/* Left — Today's Mission */}
-                                <div style={{ background: colors.surfaceContainerLow, borderRadius: 12, border: `1px solid ${colors.outlineVariant}66`, padding: 32 }}>
+                                <div style={{ background: colors.surfaceContainerLow, borderRadius: 12, border: `1px solid ${colors.outlineVariant}66`, padding: 24 }}>
                                     {allComplete ? (
                                         <div style={{ textAlign: "center", padding: "24px 0" }}>
                                             <p style={{ fontSize: 24, fontWeight: 700, color: colors.onSurface, marginBottom: 8 }}>🎉 Sprint Complete</p>
-                                            <p style={{ fontSize: 16, color: colors.onSurfaceVariant }}>You've finished all 7 days. Check your Evidence Vault.</p>
+                                            <p style={{ fontSize: 16, color: colors.onSurfaceVariant, marginBottom: 24 }}>
+                                                You've finished all 7 days. Let FounderAI re-evaluate your idea based on your evidence.
+                                            </p>
+                                            {reEvalResult ? (
+                                                <div style={{ textAlign: "left", background: colors.surfaceContainerLowest, borderRadius: 12, padding: 24, border: `1px solid ${colors.outlineVariant}4D` }}>
+                                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                                                        <p style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.08em", color: colors.onSurfaceVariant, margin: 0 }}>Updated Verdict</p>
+                                                        {reEvalResult.verdictChanged && (
+                                                            <span style={{ fontSize: 11, background: "#fef3c7", color: "#92400e", padding: "2px 8px", borderRadius: 6, fontWeight: 600 }}>VERDICT CHANGED</span>
+                                                        )}
+                                                    </div>
+                                                    <p style={{ fontSize: 28, fontWeight: 800, color: colors.primary, marginBottom: 4, letterSpacing: "-0.02em" }}>
+                                                        {reEvalResult.updatedVerdict}
+                                                    </p>
+                                                    <p style={{ fontSize: 13, color: colors.onSurfaceVariant, marginBottom: 16 }}>{reEvalResult.updatedConfidence} Confidence</p>
+                                                    <p style={{ fontSize: 15, color: colors.onSurface, lineHeight: 1.65, marginBottom: 16 }}>{reEvalResult.explanation}</p>
+                                                    <div style={{ background: colors.primaryFixed, borderRadius: 10, padding: "12px 16px" }}>
+                                                        <p style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const, color: colors.onPrimaryFixedVariant, marginBottom: 4 }}>Next Step</p>
+                                                        <p style={{ fontSize: 14, color: colors.onPrimaryFixedVariant, margin: 0, lineHeight: 1.5 }}>{reEvalResult.nextStep}</p>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <button
+                                                    onClick={async () => {
+                                                        setReEvalLoading(true);
+                                                        try {
+                                                            const evidenceSummary = checkins
+                                                                .filter(c => c.completed && c.evidence_note)
+                                                                .map(c => `Day ${c.day_number}: ${c.evidence_note}`)
+                                                                .join("\n");
+                                                            const res = await fetch("/api/re-evaluate", {
+                                                                method: "POST",
+                                                                headers: { "Content-Type": "application/json" },
+                                                                body: JSON.stringify({ originalReport: report, evidenceSummary }),
+                                                            });
+                                                            const result = await res.json();
+                                                            setReEvalResult(result);
+                                                        } catch (err) {
+                                                            console.error("Re-eval failed:", err);
+                                                        } finally {
+                                                            setReEvalLoading(false);
+                                                        }
+                                                    }}
+                                                    disabled={reEvalLoading}
+                                                    style={{ background: colors.primary, color: "#fff", border: "none", padding: "14px 32px", borderRadius: 12, fontSize: 15, fontWeight: 700, cursor: reEvalLoading ? "not-allowed" : "pointer", opacity: reEvalLoading ? 0.7 : 1, fontFamily: "Inter, sans-serif" }}
+                                                >
+                                                    {reEvalLoading ? "AI is reviewing your evidence..." : "Get AI Re-evaluation →"}
+                                                </button>
+                                            )}
                                         </div>
                                     ) : todaysTask ? (
                                         <>
-                                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
+                                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
                                                 <span style={{ padding: "4px 12px", background: colors.surfaceContainerHighest, color: colors.primary, fontSize: 12, fontWeight: 500, borderRadius: 8 }}>IN PROGRESS</span>
                                                 <span style={{ color: colors.error, fontSize: 14, fontWeight: 500 }}>{daysRemaining} Days Remaining</span>
                                             </div>
-                                            <h2 style={{ fontSize: 24, fontWeight: 600, color: colors.onSurface, marginBottom: 8 }}>Today's Mission — Day {todaysTask.day_number}</h2>
-                                            <p style={{ fontSize: 16, color: colors.onSurfaceVariant, marginBottom: 24 }}>{todaysTask.task_description}</p>
-                                            <div style={{ display: "flex", gap: 24, marginBottom: 24 }}>
+                                            <h2 style={{ fontSize: 24, fontWeight: 600, color: colors.onSurface, marginBottom: 8 }}>Today's Mission — Day {todaysTask.day_number || 1}</h2>
+                                            <p style={{ fontSize: 16, color: colors.onSurfaceVariant, marginBottom: 20 }}>{todaysTask.task_description || "Talk to your target audience and gather evidence about their biggest problem."}</p>
+                                            <div style={{ display: "flex", gap: 24, marginBottom: 20 }}>
                                                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                                     <span className="material-symbols-outlined" style={{ color: colors.onSurfaceVariant }}>schedule</span>
-                                                    <span style={{ fontSize: 14 }}>{todaysTask.estimated_minutes} minutes</span>
+                                                    <span style={{ fontSize: 14 }}>{todaysTask.estimated_minutes || 20} minutes</span>
                                                 </div>
                                                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                                     <span className="material-symbols-outlined" style={{ color: colors.primary }}>workspace_premium</span>
-                                                    <span style={{ fontSize: 14, fontWeight: 600, color: colors.primary }}>+{todaysTask.evidence_reward} Evidence</span>
+                                                    <span style={{ fontSize: 14, fontWeight: 600, color: colors.primary }}>+{todaysTask.evidence_reward || 10} Evidence</span>
                                                 </div>
                                             </div>
                                             {showSuccess ? (
@@ -430,167 +480,195 @@ export default function DashboardPage() {
                                     ) : null}
                                 </div>
 
-                                {/* Right Column */}
-                                <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-                                    {/* Core Risk Assumption */}
-                                    <div style={{ background: "#fff1f1", borderRadius: 12, border: `2px solid ${colors.error}33`, padding: 24 }}>
-                                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, color: colors.error }}>
-                                            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>psychology</span>
-                                            <h3 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>Core Risk Assumption</h3>
-                                        </div>
-                                        <p style={{ fontSize: 15, color: colors.onSurface, fontWeight: 500, lineHeight: 1.6, margin: 0 }}>
-                                            {report?.biggestRisk?.assumption ? `"${report.biggestRisk.assumption}"` : "No risk identified yet."}
-                                        </p>
+                            {/* Right Column */}
+                            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                                {/* Core Risk Assumption */}
+                                <div style={{ background: "#fff1f1", borderRadius: 12, border: `2px solid ${colors.error}33`, padding: 20 }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, color: colors.error }}>
+                                        <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>psychology</span>
+                                        <h3 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>Core Risk Assumption</h3>
                                     </div>
+                                    <p style={{ fontSize: 14, color: colors.onSurface, fontWeight: 500, lineHeight: 1.6, margin: 0 }}>
+                                        {report?.biggestRisk?.assumption ? `"${report.biggestRisk.assumption}"` : "No risk identified yet."}
+                                    </p>
+                                </div>
 
-                                    {/* FounderAI Insight — replaces Sprint Progress */}
-                                    <div style={{ background: colors.primary, borderRadius: 12, padding: 24 }}>
-                                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                                            <span className="material-symbols-outlined" style={{ color: "#fff" }}>auto_awesome</span>
-                                            <h3 style={{ fontSize: 16, fontWeight: 600, margin: 0, color: "#fff" }}>FounderAI Insight</h3>
-                                        </div>
-                                        <p style={{ fontSize: 14, color: "rgba(255,255,255,0.85)", lineHeight: 1.65, margin: 0 }}>
-                                            {report?.biggestRisk?.failureScenario || "Complete your validation report to unlock AI insights."}
-                                        </p>
+                                {/* FounderAI Insight */}
+                                <div style={{ background: colors.primary, borderRadius: 12, padding: 20 }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                                        <span className="material-symbols-outlined" style={{ color: "#fff" }}>auto_awesome</span>
+                                        <h3 style={{ fontSize: 16, fontWeight: 600, margin: 0, color: "#fff" }}>FounderAI Insight</h3>
                                     </div>
+                                    <p style={{ fontSize: 14, color: "rgba(255,255,255,0.85)", lineHeight: 1.6, margin: 0 }}>
+                                        {report?.biggestRisk?.failureScenario || "Complete your validation report to unlock AI insights."}
+                                    </p>
                                 </div>
                             </div>
-                        </>
+                        </div>
+                </>
                     )}
 
-                    {/* ── CURRENT SPRINT VIEW ── */}
-                    {activeView === "sprint" && (
-                        <>
-                            <div style={{ marginBottom: 32 }}>
-                                <h1 style={{ fontSize: 36, letterSpacing: "-0.04em", fontWeight: 700, color: colors.onSurface, margin: 0 }}>Sprint Progress</h1>
-                                <p style={{ fontSize: 16, color: colors.onSurfaceVariant, marginTop: 4 }}>Your 7-day validation timeline.</p>
-                            </div>
-                            <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 640 }}>
-                                {checkins.map(c => (
-                                    <div key={c.id} style={{ display: "flex", alignItems: "flex-start", gap: 16, padding: 20, background: colors.surfaceContainerLowest, borderRadius: 12, border: `1px solid ${c.completed ? colors.primary + "33" : colors.outlineVariant + "4D"}` }}>
-                                        <span className="material-symbols-outlined" style={{ fontSize: 22, color: c.completed ? colors.primary : colors.outlineVariant, flexShrink: 0, marginTop: 2 }}>
-                                            {c.completed ? "check_circle" : "radio_button_unchecked"}
-                                        </span>
-                                        <div>
-                                            <p style={{ fontSize: 14, fontWeight: 600, color: colors.onSurface, margin: "0 0 4px" }}>Day {c.day_number}</p>
-                                            <p style={{ fontSize: 13, color: colors.onSurfaceVariant, margin: 0 }}>{c.task_description}</p>
-                                            {c.evidence_note && <p style={{ fontSize: 12, color: colors.primary, marginTop: 6, fontStyle: "italic" }}>"{c.evidence_note}"</p>}
-                                        </div>
+                {/* ── CURRENT SPRINT VIEW ── */}
+                {activeView === "sprint" && (
+                    <>
+                        <div style={{ marginBottom: 32 }}>
+                            <h1 style={{ fontSize: 36, letterSpacing: "-0.04em", fontWeight: 700, color: colors.onSurface, margin: 0 }}>Sprint Progress</h1>
+                            <p style={{ fontSize: 16, color: colors.onSurfaceVariant, marginTop: 4 }}>Your 7-day validation timeline.</p>
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 640 }}>
+                            {checkins.map(c => (
+                                <div key={c.id} style={{ display: "flex", alignItems: "flex-start", gap: 16, padding: 20, background: colors.surfaceContainerLowest, borderRadius: 12, border: `1px solid ${c.completed ? colors.primary + "33" : colors.outlineVariant + "4D"}` }}>
+                                    <span className="material-symbols-outlined" style={{ fontSize: 22, color: c.completed ? colors.primary : colors.outlineVariant, flexShrink: 0, marginTop: 2 }}>
+                                        {c.completed ? "check_circle" : "radio_button_unchecked"}
+                                    </span>
+                                    <div>
+                                        <p style={{ fontSize: 14, fontWeight: 600, color: colors.onSurface, margin: "0 0 4px" }}>Day {c.day_number}</p>
+                                        <p style={{ fontSize: 13, color: colors.onSurfaceVariant, margin: 0 }}>{c.task_description}</p>
+                                        {c.evidence_note && <p style={{ fontSize: 12, color: colors.primary, marginTop: 6, fontStyle: "italic" }}>"{c.evidence_note}"</p>}
                                     </div>
-                                ))}
-                            </div>
-                        </>
-                    )}
-
-                    {/* ── EVIDENCE VAULT VIEW ── */}
-                    {activeView === "evidence" && (
-                        <>
-                            <div style={{ marginBottom: 32 }}>
-                                <h1 style={{ fontSize: 36, letterSpacing: "-0.04em", fontWeight: 700, color: colors.onSurface, margin: 0 }}>Evidence Vault</h1>
-                                <p style={{ fontSize: 16, color: colors.onSurfaceVariant, marginTop: 4 }}>Everything you've collected so far.</p>
-                            </div>
-                            {checkins.filter(c => c.completed).length === 0 ? (
-                                <p style={{ fontSize: 15, color: colors.onSurfaceVariant }}>No evidence logged yet. Complete today's mission to start your vault.</p>
-                            ) : (
-                                <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 720 }}>
-                                    {checkins.filter(c => c.completed).map(c => (
-                                        <div key={c.id} style={{ padding: 24, background: colors.surfaceContainerLowest, borderRadius: 12, border: `1px solid ${colors.outlineVariant}4D` }}>
-                                            <p style={{ fontSize: 14, fontWeight: 600, color: colors.onSurface, margin: "0 0 8px" }}>Day {c.day_number}: {c.task_description}</p>
-                                            {c.evidence_note && <p style={{ fontSize: 13, color: colors.onSurfaceVariant, margin: "0 0 6px", fontStyle: "italic" }}>"{c.evidence_note}"</p>}
-                                            {c.evidence_link && <a href={c.evidence_link} target="_blank" rel="noreferrer" style={{ fontSize: 13, color: colors.primary }}>{c.evidence_link}</a>}
-                                        </div>
-                                    ))}
                                 </div>
-                            )}
-                        </>
-                    )}
+                            ))}
+                        </div>
+                    </>
+                )}
 
-                    {/* ── IDEAS VIEW ── */}
-                    {activeView === "ideas" && (
-                        <>
-                            <div style={{ marginBottom: 32 }}>
-                                <h1 style={{ fontSize: 36, letterSpacing: "-0.04em", fontWeight: 700, color: colors.onSurface, margin: 0 }}>Your Idea</h1>
-                                <p style={{ fontSize: 16, color: colors.onSurfaceVariant, marginTop: 4 }}>The problem you are working on — and everything behind it.</p>
-                            </div>
+                {/* ── EVIDENCE VAULT VIEW ── */}
+                {activeView === "evidence" && (
+                    <>
+                        <div style={{ marginBottom: 32 }}>
+                            <h1 style={{ fontSize: 36, letterSpacing: "-0.04em", fontWeight: 700, color: colors.onSurface, margin: 0 }}>Evidence Vault</h1>
+                            <p style={{ fontSize: 16, color: colors.onSurfaceVariant, marginTop: 4 }}>Everything you've collected so far.</p>
+                        </div>
+                        {checkins.filter(c => c.completed).length === 0 ? (
+                            <p style={{ fontSize: 15, color: colors.onSurfaceVariant }}>No evidence logged yet. Complete today's mission to start your vault.</p>
+                        ) : (
                             <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 720 }}>
-                                {[
-                                    { label: "What problem are you solving?", value: idea?.problem },
-                                    { label: "Who experiences this problem most?", value: idea?.customer },
-                                    { label: "How do they solve it today?", value: idea?.current_solution },
-                                    { label: "How often does it happen?", value: idea?.frequency },
-                                    { label: "What happens if it stays unsolved?", value: idea?.consequence },
-                                    { label: "Why are you the right person?", value: idea?.why_you },
-                                    { label: "What evidence do you already have?", value: idea?.evidence_level },
-                                    { label: "What is your goal?", value: idea?.goal },
-                                ].map((q) => (
-                                    <div key={q.label} style={{ padding: 20, background: colors.surfaceContainerLowest, borderRadius: 12, border: `1px solid ${colors.outlineVariant}4D` }}>
-                                        <p style={{ fontSize: 12, letterSpacing: "0.05em", fontWeight: 600, textTransform: "uppercase" as const, color: colors.onSurfaceVariant, marginBottom: 6 }}>{q.label}</p>
-                                        <p style={{ fontSize: 15, color: colors.onSurface, margin: 0, lineHeight: 1.6 }}>{q.value || "—"}</p>
+                                {checkins.filter(c => c.completed).map(c => (
+                                    <div key={c.id} style={{ padding: 24, background: colors.surfaceContainerLowest, borderRadius: 12, border: `1px solid ${colors.outlineVariant}4D` }}>
+                                        <p style={{ fontSize: 14, fontWeight: 600, color: colors.onSurface, margin: "0 0 8px" }}>Day {c.day_number}: {c.task_description}</p>
+                                        {c.evidence_note && <p style={{ fontSize: 13, color: colors.onSurfaceVariant, margin: "0 0 6px", fontStyle: "italic" }}>"{c.evidence_note}"</p>}
+                                        {c.evidence_link && <a href={c.evidence_link} target="_blank" rel="noreferrer" style={{ fontSize: 13, color: colors.primary }}>{c.evidence_link}</a>}
                                     </div>
                                 ))}
                             </div>
-                        </>
-                    )}
+                        )}
+                    </>
+                )}
 
-                    {/* ── PROFILE VIEW ── */}
-                    {activeView === "profile" && (
-                        <>
-                            <div style={{ marginBottom: 32 }}>
-                                <h1 style={{ fontSize: 36, letterSpacing: "-0.04em", fontWeight: 700, color: colors.onSurface, margin: 0 }}>Profile</h1>
-                                <p style={{ fontSize: 16, color: colors.onSurfaceVariant, marginTop: 4 }}>Your account details.</p>
-                            </div>
-                            <div style={{ maxWidth: 480 }}>
-                                <div style={{ padding: 32, background: colors.surfaceContainerLowest, borderRadius: 16, border: `1px solid ${colors.outlineVariant}4D` }}>
-                                    <div style={{ width: 72, height: 72, borderRadius: "50%", background: colors.primary, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 24 }}>
-                                        <span style={{ fontSize: 28, fontWeight: 700, color: "#fff" }}>
-                                            {user?.email?.charAt(0).toUpperCase()}
-                                        </span>
+                {/* ── IDEAS VIEW ── */}
+                {activeView === "ideas" && (
+                    <>
+                        <div style={{ marginBottom: 32 }}>
+                            <h1 style={{ fontSize: 36, letterSpacing: "-0.04em", fontWeight: 700, color: colors.onSurface, margin: 0 }}>Your Idea</h1>
+                            <p style={{ fontSize: 16, color: colors.onSurfaceVariant, marginTop: 4 }}>The problem you are working on — and everything behind it.</p>
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 720 }}>
+                            {[
+                                { label: "What problem are you solving?", value: idea?.problem },
+                                { label: "Who experiences this problem most?", value: idea?.customer },
+                                { label: "How do they solve it today?", value: idea?.current_solution },
+                                { label: "How often does it happen?", value: idea?.frequency },
+                                { label: "What happens if it stays unsolved?", value: idea?.consequence },
+                                { label: "Why are you the right person?", value: idea?.why_you },
+                                { label: "What evidence do you already have?", value: idea?.evidence_level },
+                                { label: "What is your goal?", value: idea?.goal },
+                            ].map((q) => (
+                                <div key={q.label} style={{ padding: 20, background: colors.surfaceContainerLowest, borderRadius: 12, border: `1px solid ${colors.outlineVariant}4D` }}>
+                                    <p style={{ fontSize: 12, letterSpacing: "0.05em", fontWeight: 600, textTransform: "uppercase" as const, color: colors.onSurfaceVariant, marginBottom: 6 }}>{q.label}</p>
+                                    <p style={{ fontSize: 15, color: colors.onSurface, margin: 0, lineHeight: 1.6 }}>{q.value || "—"}</p>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* CTA after ideas */}
+                        <div style={{ marginTop: 32, padding: 28, background: allComplete ? colors.surfaceContainerLow : "#fff8e1", borderRadius: 16, border: `1px solid ${allComplete ? colors.outlineVariant + "4D" : "#ffe082"}`, maxWidth: 720 }}>
+                            {allComplete ? (
+                                <>
+                                    <p style={{ fontSize: 18, fontWeight: 700, color: colors.onSurface, marginBottom: 8 }}>🎉 Sprint complete — ready for your next idea?</p>
+                                    <p style={{ fontSize: 14, color: colors.onSurfaceVariant, marginBottom: 20, lineHeight: 1.6 }}>
+                                        You've validated this idea end-to-end. The evidence is in your vault. Now you can start fresh with a new startup idea.
+                                    </p>
+                                    <a href="/validate" style={{ display: "inline-block", background: colors.primary, color: "#fff", padding: "12px 24px", borderRadius: 10, fontSize: 14, fontWeight: 700, textDecoration: "none" }}>
+                                        Validate a new idea →
+                                    </a>
+                                </>
+                            ) : (
+                                <>
+                                    <p style={{ fontSize: 18, fontWeight: 700, color: "#b45309", marginBottom: 8 }}>⚠️ Complete your 7-day sprint first.</p>
+                                    <p style={{ fontSize: 14, color: "#92400e", marginBottom: 20, lineHeight: 1.6 }}>
+                                        FounderAI holds you accountable. Finish validating this idea before starting a new one — that's how real founders build conviction.
+                                    </p>
+                                    <button
+                                        onClick={() => setActiveView("dashboard")}
+                                        style={{ background: "#f59e0b", color: "#fff", border: "none", padding: "12px 24px", borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "Inter, sans-serif" }}
+                                    >
+                                        Back to today's mission →
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    </>
+                )}
+
+                {/* ── PROFILE VIEW ── */}
+                {activeView === "profile" && (
+                    <>
+                        <div style={{ marginBottom: 32 }}>
+                            <h1 style={{ fontSize: 36, letterSpacing: "-0.04em", fontWeight: 700, color: colors.onSurface, margin: 0 }}>Profile</h1>
+                            <p style={{ fontSize: 16, color: colors.onSurfaceVariant, marginTop: 4 }}>Your account details.</p>
+                        </div>
+                        <div style={{ maxWidth: 480 }}>
+                            <div style={{ padding: 32, background: colors.surfaceContainerLowest, borderRadius: 16, border: `1px solid ${colors.outlineVariant}4D` }}>
+                                <div style={{ width: 72, height: 72, borderRadius: "50%", background: colors.primary, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 24 }}>
+                                    <span style={{ fontSize: 28, fontWeight: 700, color: "#fff" }}>
+                                        {user?.email?.charAt(0).toUpperCase()}
+                                    </span>
+                                </div>
+                                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                                    <div>
+                                        <p style={{ fontSize: 12, letterSpacing: "0.05em", fontWeight: 600, textTransform: "uppercase" as const, color: colors.onSurfaceVariant, marginBottom: 4 }}>Email</p>
+                                        <p style={{ fontSize: 16, color: colors.onSurface, margin: 0, fontWeight: 500 }}>{user?.email || "—"}</p>
                                     </div>
-                                    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                                        <div>
-                                            <p style={{ fontSize: 12, letterSpacing: "0.05em", fontWeight: 600, textTransform: "uppercase" as const, color: colors.onSurfaceVariant, marginBottom: 4 }}>Email</p>
-                                            <p style={{ fontSize: 16, color: colors.onSurface, margin: 0, fontWeight: 500 }}>{user?.email || "—"}</p>
-                                        </div>
-                                        <div>
-                                            <p style={{ fontSize: 12, letterSpacing: "0.05em", fontWeight: 600, textTransform: "uppercase" as const, color: colors.onSurfaceVariant, marginBottom: 4 }}>Member since</p>
-                                            <p style={{ fontSize: 16, color: colors.onSurface, margin: 0 }}>
-                                                {user?.created_at ? new Date(user.created_at).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" }) : "—"}
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <p style={{ fontSize: 12, letterSpacing: "0.05em", fontWeight: 600, textTransform: "uppercase" as const, color: colors.onSurfaceVariant, marginBottom: 4 }}>Active idea</p>
-                                            <p style={{ fontSize: 16, color: colors.onSurface, margin: 0 }}>{ideaLabel}</p>
-                                        </div>
-                                        <button
-                                            onClick={async () => { if (supabase) { await supabase.auth.signOut(); window.location.href = "/landing.html"; } }}
-                                            style={{ marginTop: 8, background: "transparent", color: colors.error, border: `1px solid ${colors.error}`, padding: "10px 20px", borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif" }}
-                                        >
-                                            Sign Out
-                                        </button>
+                                    <div>
+                                        <p style={{ fontSize: 12, letterSpacing: "0.05em", fontWeight: 600, textTransform: "uppercase" as const, color: colors.onSurfaceVariant, marginBottom: 4 }}>Member since</p>
+                                        <p style={{ fontSize: 16, color: colors.onSurface, margin: 0 }}>
+                                            {user?.created_at ? new Date(user.created_at).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" }) : "—"}
+                                        </p>
                                     </div>
+                                    <div>
+                                        <p style={{ fontSize: 12, letterSpacing: "0.05em", fontWeight: 600, textTransform: "uppercase" as const, color: colors.onSurfaceVariant, marginBottom: 4 }}>Active idea</p>
+                                        <p style={{ fontSize: 16, color: colors.onSurface, margin: 0 }}>{ideaLabel}</p>
+                                    </div>
+                                    <button
+                                        onClick={async () => { if (supabase) { await supabase.auth.signOut(); window.location.href = "/landing.html"; } }}
+                                        style={{ marginTop: 8, background: "transparent", color: colors.error, border: `1px solid ${colors.error}`, padding: "10px 20px", borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif" }}
+                                    >
+                                        Sign Out
+                                    </button>
                                 </div>
                             </div>
-                        </>
-                    )}
-                </div>
-            </main>
+                        </div>
+                    </>
+                )}
+        </div>
+            </main >
 
-            {/* Mobile Nav */}
-            <div className="dash-mobile-nav" style={{ display: "none", position: "fixed", bottom: 0, left: 0, right: 0, height: 64, background: colors.surfaceContainerHigh, borderTop: `1px solid ${colors.outlineVariant}4D`, alignItems: "center", justifyContent: "space-around", zIndex: 50 }}>
-                {[
-                    { view: "dashboard" as ActiveView, icon: "dashboard", label: "Dash" },
-                    { view: "sprint" as ActiveView, icon: "bolt", label: "Sprint" },
-                    { view: "evidence" as ActiveView, icon: "folder_shared", label: "Vault" },
-                    { view: "profile" as ActiveView, icon: "person", label: "Profile" },
-                ].map(item => (
-                    <a key={item.view} href="#" className="dash-link"
-                        onClick={(e) => { e.preventDefault(); setActiveView(item.view); }}
-                        style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, color: activeView === item.view ? colors.primary : colors.onSurfaceVariant }}>
-                        <span className="material-symbols-outlined">{item.icon}</span>
-                        <span style={{ fontSize: 10, fontWeight: 500 }}>{item.label}</span>
-                    </a>
-                ))}
-            </div>
+        {/* Mobile Nav */}
+        <div className="dash-mobile-nav" style={{ display: "none", position: "fixed", bottom: 0, left: 0, right: 0, height: 64, background: colors.surfaceContainerHigh, borderTop: `1px solid ${colors.outlineVariant}4D`, alignItems: "center", justifyContent: "space-around", zIndex: 50 }}>
+            {[
+                { view: "dashboard" as ActiveView, icon: "dashboard", label: "Dash" },
+                { view: "sprint" as ActiveView, icon: "bolt", label: "Sprint" },
+                { view: "evidence" as ActiveView, icon: "folder_shared", label: "Vault" },
+                { view: "profile" as ActiveView, icon: "person", label: "Profile" },
+            ].map(item => (
+                <a key={item.view} href="#" className="dash-link"
+                    onClick={(e) => { e.preventDefault(); setActiveView(item.view); }}
+                    style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, color: activeView === item.view ? colors.primary : colors.onSurfaceVariant }}>
+                    <span className="material-symbols-outlined">{item.icon}</span>
+                    <span style={{ fontSize: 10, fontWeight: 500 }}>{item.label}</span>
+                </a>
+            ))}
+        </div>
         </div>
     );
 }
