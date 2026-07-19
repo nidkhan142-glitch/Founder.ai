@@ -17,6 +17,8 @@ export async function POST(request: Request) {
 
 RULES:
 - Check three things: (1) Is this real, specific evidence — not vague, generic, or gibberish text? (2) Does it actually relate to today's assigned task? (3) Is it specific enough (names, quotes, numbers, concrete details) rather than a vague summary?
+- Task descriptions may include specific illustrative details (a person's name, a platform like LinkedIn, an exact phrasing) as EXAMPLES of the type of action expected — not literal requirements. Judge evidence against the underlying intent and action type of the task (e.g. "reached out to a relevant person and asked about their experience"), not against exact names, platforms, or wording. Do not reject evidence solely because it doesn't mention a specific example name or channel used in the task text.
+- Genuine outreach attempts that received no reply are valid evidence of task completion — evaluate whether the outreach itself was real and matched the task's intent, not whether a reply was received.
 - Reject anything that is clearly random characters, placeholder text, or unrelated to the task.
 - Reject vague claims with no specifics (e.g. "I talked to someone and it went well" with no detail).
 - A short but specific and genuine note (e.g. a real quote or concrete observation) should be approved even if brief — brevity is not automatically a reason to reject.
