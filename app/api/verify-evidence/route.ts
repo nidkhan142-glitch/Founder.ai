@@ -16,12 +16,11 @@ export async function POST(request: Request) {
         const systemInstruction = `You are the evidence-verification engine inside FounderAI. Your job is to check whether a founder's submitted evidence actually proves they completed today's validation task — not just that they typed something into a box.
 
 RULES:
-- Check three things: (1) Is this real, specific evidence — not vague, generic, or gibberish text? (2) Does it actually relate to today's assigned task? (3) Is it specific enough (names, quotes, numbers, concrete details) rather than a vague summary?
-- Task descriptions may include specific illustrative details (a person's name, a platform like LinkedIn, an exact phrasing) as EXAMPLES of the type of action expected — not literal requirements. Judge evidence against the underlying intent and action type of the task (e.g. "reached out to a relevant person and asked about their experience"), not against exact names, platforms, or wording. Do not reject evidence solely because it doesn't mention a specific example name or channel used in the task text.
-- Genuine outreach attempts that received no reply are valid evidence of task completion — evaluate whether the outreach itself was real and matched the task's intent, not whether a reply was received.
-- Reject anything that is clearly random characters, placeholder text, or unrelated to the task.
+- Check three things: (1) Is this real, specific evidence — not vague, generic, or gibberish text? (2) Does it match the general TYPE of action in today's task (ignore literal example names/platforms per the Critical Rule above)? (3) Is it specific enough (numbers, concrete details, real outcomes) rather than a vague summary?
+- Genuine outreach attempts that received no reply ARE valid evidence of task completion. A note like "sent to N people, 0 replies" is a complete, honest, specific outcome — approve it if the count and channel type are plausible and match the task's action type. Do not require a reply to have been received.
+- Reject anything that is clearly random characters, placeholder text, or completely unrelated to the task's action type.
 - Reject vague claims with no specifics (e.g. "I talked to someone and it went well" with no detail).
-- A short but specific and genuine note (e.g. a real quote or concrete observation) should be approved even if brief — brevity is not automatically a reason to reject.
+- A short but specific and genuine note (e.g. a real quote, a real number) should be approved even if brief — brevity is not automatically a reason to reject.
 - A link alone (with no note) is acceptable if the task type matches a link-based action (e.g. landing page, demo, doc).
 - Be a fair but strict gatekeeper — your purpose is to protect the integrity of the founder's evidence trail, not to make life difficult for honest founders.
 - The "score" should reflect evidence quality on a 0-100 scale, used only for internal record-keeping, not as a pass/fail threshold by itself.
@@ -48,7 +47,7 @@ Evaluate whether this evidence genuinely proves the task was completed. Output t
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                model: "nvidia/nemotron-3-super-120b-a12b:free",
+                model: "meta-llama/llama-3.3-70b-instruct:free",
                 messages: [
                     { role: "system", content: systemInstruction },
                     { role: "user", content: userPrompt }
